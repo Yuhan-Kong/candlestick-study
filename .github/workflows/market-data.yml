@@ -1,0 +1,23 @@
+# 每个交易日美股收盘后更新 market/*.json（学习页在浏览器里用这些数据现场计算）
+name: market-data
+on:
+  schedule:
+    - cron: "30 21 * * 1-5"   # 美东 16:30（夏令时）/ 17:30（冬令时）之后
+    - cron: "15 23 * * 1-5"   # 补跑一次，防止 Yahoo 数据延迟
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python scripts/fetch_data.py --out .
+      - run: |
+          git config user.name "market-data-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add market
+          git diff --cached --quiet || (git commit -m "更新行情 $(date -u +%F)" && git push)
