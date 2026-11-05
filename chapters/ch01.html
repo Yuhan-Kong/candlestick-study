@@ -72,6 +72,14 @@ nav.top { font-size: 14px; margin-bottom: 14px; } nav.top a { color: var(--muted
 #chat-form textarea { flex: 1; resize: none; border: 1px solid var(--line); border-radius: 10px; padding: 7px 9px; font: inherit; font-size: 14px; }
 #chat-form button { border: 0; background: var(--fg); color: #fff; border-radius: 10px; padding: 0 14px; cursor: pointer; }
 .chat-foot { font-size: 11.5px; padding: 0 12px 9px; }
+#chat-settings { padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 13.5px; display: flex; flex-direction: column; gap: 6px; background: #fafbfc; }
+#chat-settings[hidden], #chat-settings .base-row[hidden] { display: none; }
+#chat-settings p { margin: 0 0 4px; font-size: 12.5px; line-height: 1.55; }
+#chat-settings label { display: flex; flex-direction: column; gap: 2px; }
+#chat-settings input, #chat-settings select { font: inherit; padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px; }
+#chat-settings .row { display: flex; gap: 8px; margin-top: 4px; }
+#chat-settings .row button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 4px 12px; cursor: pointer; }
+#chat-settings .row button[type=submit] { background: var(--fg); color: #fff; border-color: var(--fg); }
 </style>
 </head>
 <body>
@@ -80,7 +88,7 @@ nav.top { font-size: 14px; margin-bottom: 14px; } nav.top a { color: var(--muted
 <h1>第 1 章　蜡烛的启迪</h1>
 <p class="sub">《日本蜡烛图分析技术从入门到精通》Wayne A. Corbitt 著，梁岩、刘璐 译 · 对应原书 第 3–16 页 · 第 1 天</p>
 
-<div class="data-note">数据日期：<b>2026-11-04（美东）收盘</b>。　来源：Yahoo Finance 日线（未复权 OHLC），生成于 2026-11-05 01:20 ET。　本页所有例子都使用微软（MSFT）的真实日线。</div>
+<div class="data-note">数据日期：<b>2026-11-04（美东）收盘</b>。　来源：Yahoo Finance 日线（未复权 OHLC），生成于 2026-11-05 01:24 ET。　本页所有例子都使用微软（MSFT）的真实日线。</div>
 <div class="scheme">图表配色：
   <button data-scheme-btn="book">书中样式</button>
   <button data-scheme-btn="us">绿涨红跌（美股软件）</button>
@@ -515,14 +523,40 @@ document.addEventListener("DOMContentLoaded", () => {
   quiz();
 });
 
-// 「问这一页」聊天框：右下角入口，把当前页文字 + MSFT 数据 + 问题发给本机 chat_server.py。
-// 只有通过 http://127.0.0.1:8765 打开时可用；直接双击打开的 file:// 页面会给出跳转入口；公网版本完全隐藏。
+// 「问这一页」聊天框：右下角入口，把当前页文字 + MSFT 数据 + 问题交给模型回答。
+// 两种后端：
+//   - 本机（通过 http://127.0.0.1:8765 打开）：走 chat_server.py → 本机 claude，用页面作者自己的凭据。
+//   - 其他（公网 GitHub Pages、别人下载的 file://）：访客自带 API 密钥（BYOK），密钥只存在访客自己浏览器的
+//     localStorage 里，请求从浏览器直接发给访客选的服务商，绝不经过、也不会用到页面作者的凭据。
 
 (function () {
   const SERVER = "http://127.0.0.1:8765";
+  const LOCAL = location.origin === SERVER;
   const KEY = "cs-chat:" + location.pathname;
+  const CFG_KEY = "cs-chat-byok";
   let history = JSON.parse(localStorage.getItem(KEY) || "[]");
   let candle = null;
+
+  // 与 chat_server.py 的 SYSTEM 保持一致
+  const SYSTEM = `你是一位耐心的蜡烛图（K 线）学习助教。学习者零基础，正在读《日本蜡烛图分析技术从入门到精通》
+（Wayne A. Corbitt 著），目标是在实战中看懂走势、知道对应哪个知识点。所有例子用微软（MSFT）日线。
+
+回答规则：
+- 用简体中文，先给结论再解释；尽量短，必要时用列表。零基础能听懂，术语第一次出现时顺手解释。
+- 以「当前学习页」的内容和随附的 MSFT 数据为依据；引用数字时只用给出的数据，不要编造价格、日期或新闻。
+- 尽量指出问题对应页面里的哪一节（如「1.3 原则 3」）；超出本章的内容可以简单说明，并告诉对方在第几章会细讲。
+- 讲书中观点时用自己的话转述，不要大段复述原书文字。
+- 只做学习讲解：不给买卖建议、不预测具体价格。被问到「该不该买」时，说明这超出学习范围，并转为讲解如何读图。
+- 如果页面和数据里没有足够信息，直说不知道。`;
+
+  const PROVIDERS = {
+    anthropic: { name: "Anthropic（Claude）", models: ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"],
+                 keyHint: "sk-ant-…", keyUrl: "https://console.anthropic.com/settings/keys" },
+    openai: { name: "OpenAI 兼容接口（OpenAI、OpenRouter 等）", models: [], keyHint: "sk-…",
+              baseUrl: "https://api.openai.com/v1" },
+  };
+  let cfg = Object.assign({ provider: "anthropic", model: "claude-opus-5-5", key: "", baseUrl: PROVIDERS.openai.baseUrl },
+                          JSON.parse(localStorage.getItem(CFG_KEY) || "{}"));
 
   window.csSelectCandle = r => {
     candle = r;
@@ -548,33 +582,115 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function open(show) {
     document.getElementById("chat-panel").hidden = !show;
-    if (show) document.getElementById("chat-q").focus();
+    if (show && !LOCAL && !cfg.key) showSettings(true);
+    else if (show) document.getElementById("chat-q").focus();
+  }
+
+  function context(q, sel) {
+    const rows = (window.D && (D.year || D.sixty) || []).map(r => [r.date, r.o, r.h, r.l, r.c, r.v].join(","));
+    return {
+      title: document.title, page: document.querySelector("main").innerText, rows, question: q, history,
+      selection: sel || null,
+      candle: candle ? `${candle.date} 开 ${candle.o} 高 ${candle.h} 低 ${candle.l} 收 ${candle.c} 量 ${candle.v}` : null,
+    };
+  }
+
+  // 与 chat_server.py 的 build_prompt 保持一致
+  function buildPrompt(req) {
+    const parts = [`# 当前学习页：${req.title}\n${req.page.slice(0, 30000)}`];
+    if (req.rows.length) parts.push("# MSFT 日线（date,open,high,low,close,volume）\n" + req.rows.slice(-130).join("\n"));
+    if (req.candle) parts.push(`# 学习者在图上点选的 K 线\n${req.candle}`);
+    if (req.selection) parts.push(`# 学习者选中的页面文字\n${req.selection.slice(0, 2000)}`);
+    const hist = req.history.slice(-10);
+    if (hist.length) parts.push("# 之前的对话\n" + hist.map(h => `${h.role === "user" ? "学习者" : "助教"}：${h.text}`).join("\n"));
+    parts.push(`# 学习者现在的问题\n${req.question}`);
+    return parts.join("\n\n");
+  }
+
+  // 逐块读取流式响应；onEvent 收到每个 SSE data 行（本机服务是纯文本，直接整块给）
+  async function readStream(res, onChunk) {
+    const reader = res.body.getReader(), dec = new TextDecoder();
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) return;
+      onChunk(dec.decode(value, { stream: true }));
+    }
+  }
+
+  function sseLines(onData) {
+    let buf = "";
+    return chunk => {
+      buf += chunk;
+      const lines = buf.split("\n");
+      buf = lines.pop();
+      for (const l of lines) if (l.startsWith("data:")) onData(l.slice(5).trim());
+    };
+  }
+
+  async function askLocal(req, emit) {
+    const res = await fetch(SERVER + "/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(req) });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    await readStream(res, emit);
+  }
+
+  async function askAnthropic(req, emit) {
+    const body = {
+      model: cfg.model, max_tokens: 8000, stream: true, system: SYSTEM,
+      output_config: { effort: "low" },               // 聊天类问题用低 effort，回答更快
+      messages: [{ role: "user", content: buildPrompt(req) }],
+    };
+    const headers = {
+      "content-type": "application/json", "x-api-key": cfg.key, "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true",   // 允许浏览器直连（访客自己的密钥）
+    };
+    if (cfg.model !== "claude-haiku-5-5") {           // 被安全分类器拒答时自动换模型重试
+      headers["anthropic-beta"] = "server-side-fallback-2026-07-01";
+      body.fallbacks = "default";
+    }
+    const res = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers, body: JSON.stringify(body) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}：${(await res.text()).slice(0, 300)}`);
+    await readStream(res, sseLines(d => {
+      const ev = JSON.parse(d);
+      if (ev.type === "content_block_delta" && ev.delta.type === "text_delta") emit(ev.delta.text);
+      else if (ev.type === "error") emit(`\n\n⚠️ ${ev.error.message}`);
+      else if (ev.type === "message_delta" && ev.delta.stop_reason === "refusal") emit("\n\n⚠️ 模型拒绝回答这个问题。");
+    }));
+  }
+
+  async function askOpenAI(req, emit) {
+    const res = await fetch(cfg.baseUrl.replace(/\/$/, "") + "/chat/completions", {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: "Bearer " + cfg.key },
+      body: JSON.stringify({ model: cfg.model, stream: true,
+        messages: [{ role: "system", content: SYSTEM }, { role: "user", content: buildPrompt(req) }] }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}：${(await res.text()).slice(0, 300)}`);
+    await readStream(res, sseLines(d => {
+      if (d === "[DONE]") return;
+      const t = JSON.parse(d).choices?.[0]?.delta?.content;
+      if (t) emit(t);
+    }));
   }
 
   async function ask(q) {
     const sel = String(window.getSelection() || "").trim();
     bubble("user", q + (candle ? `\n（附：${candle.date} 这根 K 线）` : "") + (sel ? "\n（附：选中的文字）" : ""));
     const out = bubble("bot", "思考中…");
-    const rows = (window.D && (D.year || D.sixty) || []).map(r => [r.date, r.o, r.h, r.l, r.c, r.v].join(","));
-    const body = {
-      title: document.title, page: document.querySelector("main").innerText, rows, question: q, history,
-      selection: sel || null,
-      candle: candle ? `${candle.date} 开 ${candle.o} 高 ${candle.h} 低 ${candle.l} 收 ${candle.c} 量 ${candle.v}` : null,
-    };
+    const req = context(q, sel);
     let text = "";
+    const emit = t => {
+      text += t; out.innerHTML = md(text);
+      const log = document.getElementById("chat-log"); log.scrollTop = log.scrollHeight;
+    };
     try {
-      const res = await fetch(SERVER + "/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      const reader = res.body.getReader(), dec = new TextDecoder();
-      for (;;) {
-        const { value, done } = await reader.read();
-        if (done) break;
-        text += dec.decode(value, { stream: true });
-        out.innerHTML = md(text);
-        const log = document.getElementById("chat-log"); log.scrollTop = log.scrollHeight;
-      }
+      if (LOCAL) await askLocal(req, emit);
+      else if (cfg.provider === "anthropic") await askAnthropic(req, emit);
+      else await askOpenAI(req, emit);
+      if (!text) emit("（没有收到回答）");
     } catch (e) {
-      text = "⚠️ 连不上本机问答服务（" + e.message + "）。在终端运行：launchctl kickstart -k gui/$(id -u)/com.yuhankong.candlestick-chat";
+      text = LOCAL
+        ? "⚠️ 连不上本机问答服务（" + e.message + "）。在终端运行：launchctl kickstart -k gui/$(id -u)/com.yuhankong.candlestick-chat"
+        : "⚠️ 请求失败：" + e.message + "\n请检查 ⚙️ 设置里的密钥和模型。若是「OpenAI 兼容接口」，该服务商需要允许浏览器直接调用（CORS）。";
       out.innerHTML = md(text);
     }
     history.push({ role: "user", text: q }, { role: "bot", text });
@@ -584,33 +700,74 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("chat-candle").hidden = true;
   }
 
+  function showSettings(show) {
+    const s = document.getElementById("chat-settings");
+    s.hidden = !show;
+    if (!show) return;
+    s.querySelector("[name=provider]").value = cfg.provider;
+    s.querySelector("[name=key]").value = cfg.key;
+    s.querySelector("[name=baseUrl]").value = cfg.baseUrl;
+    renderModels();
+  }
+
+  function renderModels() {
+    const s = document.getElementById("chat-settings");
+    const p = s.querySelector("[name=provider]").value;
+    const list = PROVIDERS[p].models;
+    s.querySelector(".base-row").hidden = p !== "openai";
+    s.querySelector("[name=key]").placeholder = PROVIDERS[p].keyHint;
+    const m = s.querySelector("[name=model]");
+    m.setAttribute("list", list.length ? "chat-models" : "");
+    document.getElementById("chat-models").innerHTML = list.map(x => `<option value="${x}">`).join("");
+    if (p !== cfg.provider) m.value = list[0] || "";
+    else m.value = cfg.model;
+    m.placeholder = list.length ? "" : "例如 gpt-4o-mini、openrouter 上的模型名";
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
-    const viaServer = location.origin === SERVER;
-    if (!viaServer && location.protocol !== "file:") return;   // 发布到公网的版本（别人看）不显示聊天入口
     const wrap = document.createElement("div");
     wrap.innerHTML = `
       <button id="chat-btn">💬 问这一页</button>
       <div id="chat-panel" hidden>
         <div class="chat-head"><b>问这一页</b><span class="muted">基于本页内容和 MSFT 数据回答</span>
+          ${LOCAL ? "" : '<button id="chat-gear" title="模型与密钥">⚙️</button>'}
           <button id="chat-clear" title="清空对话">清空</button><button id="chat-x">✕</button></div>
+        <form id="chat-settings" hidden>
+          <p class="muted">使用<b>你自己的</b> API 密钥。密钥只保存在你这台设备的浏览器里，提问时由浏览器直接发给你选的服务商，不经过本站；费用记在你自己的账户上。</p>
+          <label>服务商 <select name="provider">${Object.entries(PROVIDERS).map(([k, v]) => `<option value="${k}">${v.name}</option>`).join("")}</select></label>
+          <label class="base-row">接口地址 <input name="baseUrl"></label>
+          <label>模型 <input name="model"><datalist id="chat-models"></datalist></label>
+          <label>API 密钥 <input name="key" type="password" autocomplete="off"></label>
+          <div class="row"><button type="submit">保存</button><button type="button" id="chat-forget">删除已保存的密钥</button></div>
+        </form>
         <div id="chat-log"></div>
         <div id="chat-candle" class="chip" hidden><span></span><button title="取消">✕</button></div>
-        <form id="chat-form"><textarea id="chat-q" rows="2" placeholder="例如：为什么 10-13 比前一天涨了还是阴烛？（回车发送，Shift+回车换行）"></textarea><button>发送</button></form>
-        <div class="chat-foot muted">小技巧：点图上任意一根 K 线可以附上它；先选中一段文字再提问也会附上。</div>
+        <form id="chat-form"><textarea id="chat-q" rows="2" placeholder="例如：为什么这一天比前一天涨了还是阴烛？（回车发送，Shift+回车换行）"></textarea><button>发送</button></form>
+        <div class="chat-foot muted">小技巧：点图上任意一根 K 线可以附上它；先选中一段文字再提问也会附上。回答仅供学习，不构成投资建议。</div>
       </div>`;
     document.body.appendChild(wrap);
-    const btn = document.getElementById("chat-btn");
-    if (!viaServer) {
-      btn.textContent = "💬 打开可提问的版本";
-      btn.onclick = () => location.href = SERVER + location.pathname.replace(/^.*candlestick-study/, "");
-      return;
-    }
-    btn.onclick = () => open(document.getElementById("chat-panel").hidden);
+
+    document.getElementById("chat-btn").onclick = () => open(document.getElementById("chat-panel").hidden);
     document.getElementById("chat-x").onclick = () => open(false);
     document.getElementById("chat-clear").onclick = () => {
       history = []; localStorage.removeItem(KEY); document.getElementById("chat-log").innerHTML = "";
     };
     document.querySelector("#chat-candle button").onclick = () => { candle = null; document.getElementById("chat-candle").hidden = true; };
+    if (!LOCAL) {
+      const s = document.getElementById("chat-settings");
+      document.getElementById("chat-gear").onclick = () => showSettings(s.hidden);
+      s.querySelector("[name=provider]").onchange = renderModels;
+      s.onsubmit = e => {
+        e.preventDefault();
+        cfg = { provider: s.provider.value, model: s.model.value.trim(), key: s.key.value.trim(), baseUrl: s.baseUrl.value.trim() };
+        localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
+        showSettings(false);
+        document.getElementById("chat-q").focus();
+      };
+      document.getElementById("chat-forget").onclick = () => {
+        cfg.key = ""; localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); s.key.value = "";
+      };
+    }
     history.forEach(h => bubble(h.role, h.text));
     const qEl = document.getElementById("chat-q");
     qEl.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); document.getElementById("chat-form").requestSubmit(); } });
@@ -618,6 +775,7 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
       const q = qEl.value.trim();
       if (!q) return;
+      if (!LOCAL && !cfg.key) { showSettings(true); return; }
       qEl.value = "";
       ask(q);
     };
