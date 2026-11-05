@@ -1,0 +1,1009 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第 2 章 蜡烛图的构成和分析 · 日本蜡烛图分析技术学习笔记</title>
+<style>:root { --fg:#1f2328; --muted:#656d76; --line:#d0d7de; --bg:#fbfaf7; --card:#fff; --accent:#c2410c; --ok:#1a7f37; --bad:#cf222e; }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.75 -apple-system,"PingFang SC","Hiragino Sans GB",sans-serif; }
+main { max-width: 960px; margin: 0 auto; padding: 28px 22px 80px; }
+h1 { font-size: 30px; margin: 0 0 4px; }
+h2 { font-size: 22px; margin: 44px 0 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+h3 { font-size: 18px; margin: 26px 0 6px; }
+.sub { color: var(--muted); margin: 0 0 18px; }
+.page { color: var(--muted); font-size: 13px; font-weight: normal; margin-left: 6px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; margin: 14px 0; }
+.data-note { background:#fff7ed; border:1px solid #fed7aa; border-radius:10px; padding:10px 14px; font-size:14px; }
+.tip-box { border-left: 4px solid var(--accent); background:#fff; padding: 10px 14px; margin: 14px 0; border-radius: 0 8px 8px 0; }
+.book { border-left: 4px solid #8b949e; background:#f6f8fa; padding: 10px 14px; margin: 14px 0; border-radius: 0 8px 8px 0; font-size: 15px; }
+.book::before { content: "📖 书中要点（转述）"; display:block; font-weight:600; font-size:13px; color:var(--muted); }
+.practice { border: 2px solid #2563eb22; background: #f5f8ff; border-radius: 12px; padding: 14px 18px; margin: 16px 0; }
+.practice > h4 { margin: 0 0 6px; color:#1d4ed8; }
+.chart-box { position: relative; background:#fff; border:1px solid var(--line); border-radius:10px; padding:6px; margin: 10px 0; }
+svg.chart { width: 100%; height: auto; display: block; }
+svg.chart.small { max-width: 420px; }
+.grid { stroke: #eaeef2; stroke-width: 1; } .grid.faint { stroke:#f3f4f6; }
+.axis { font-size: 11px; fill: #8b949e; }
+.lbl { font-size: 14px; fill: var(--fg); } .lbl.muted { fill: var(--muted); }
+.mark { fill: #c2410c; } .markt { font-size: 11px; fill: #fff; text-anchor: middle; font-weight: 700; }
+.tip { position:absolute; display:none; pointer-events:none; background:#1f2328ee; color:#fff; font-size:12.5px; line-height:1.5; padding:8px 10px; border-radius:8px; z-index:5; width:180px; }
+.tip .u { color:#7ee2a8; } .tip .d { color:#ffa198; } .tip .muted { color:#c9d1d9; }
+.scheme { display:flex; gap:8px; flex-wrap:wrap; align-items:center; font-size:14px; margin: 8px 0 0; }
+.scheme button, .tabs button { border:1px solid var(--line); background:#fff; border-radius:999px; padding:4px 12px; cursor:pointer; font-size:13.5px; }
+.scheme button.on, .tabs button.on { background:var(--fg); color:#fff; border-color:var(--fg); }
+.tabs { display:flex; gap:8px; flex-wrap:wrap; margin: 10px 0 4px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; margin: 8px 0; }
+th, td { border: 1px solid var(--line); padding: 6px 9px; text-align: left; vertical-align: top; }
+th { background: #f6f8fa; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.kpi { display:grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin: 10px 0; }
+.kpi div { background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
+.kpi b { display:block; font-size: 20px; } .kpi span { font-size: 13px; color: var(--muted); }
+.q { background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:12px 0; }
+.q .opts { display:flex; flex-direction:column; gap:6px; margin-top:8px; }
+.q button.opt { text-align:left; border:1px solid var(--line); background:#fff; border-radius:8px; padding:7px 12px; cursor:pointer; font-size:15px; }
+.q button.opt:hover { background:#f6f8fa; }
+.q button.right { border-color: var(--ok); background:#dafbe1; } .q button.wrong { border-color: var(--bad); background:#ffebe9; }
+.q .exp { display:none; margin-top:10px; font-size:15px; background:#f6f8fa; border-radius:8px; padding:10px 12px; }
+#score { position: sticky; bottom: 12px; display:inline-block; background:var(--fg); color:#fff; padding:6px 14px; border-radius:999px; font-size:14px; }
+.terms { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+.terms div { background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:14.5px; }
+.terms b { display:block; }
+.toc { font-size: 14.5px; columns: 2; }
+.disclaimer { color: var(--muted); font-size: 13px; margin-top: 40px; }
+nav.top { font-size: 14px; margin-bottom: 14px; } nav.top a { color: var(--muted); }
+.muted { color: var(--muted); }
+#chat-btn { position: fixed; right: 22px; bottom: 22px; z-index: 20; background: var(--fg); color: #fff; border: 0; border-radius: 999px; padding: 11px 18px; font-size: 15px; cursor: pointer; box-shadow: 0 4px 14px #0003; }
+#chat-panel { position: fixed; right: 22px; bottom: 76px; z-index: 20; width: min(420px, calc(100vw - 30px)); height: min(600px, calc(100vh - 110px)); background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 10px 30px #0002; display: flex; flex-direction: column; }
+#chat-panel[hidden] { display: none; }
+.chat-head { display: flex; gap: 8px; align-items: baseline; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.chat-head .muted { flex: 1; font-size: 12px; }
+.chat-head button { border: 0; background: none; cursor: pointer; color: var(--muted); font-size: 13px; }
+#chat-log { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; font-size: 14.5px; line-height: 1.65; }
+.msg { max-width: 88%; padding: 8px 11px; border-radius: 12px; word-break: break-word; }
+.msg.user { align-self: flex-end; background: #1f2328; color: #fff; }
+.msg.bot { align-self: flex-start; background: #f3f4f6; }
+.msg code { background: #0000000f; padding: 0 4px; border-radius: 4px; }
+.chip { margin: 0 12px 6px; font-size: 12.5px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 999px; padding: 2px 6px 2px 10px; display: flex; justify-content: space-between; }
+.chip[hidden] { display: none; }
+.chip button { border: 0; background: none; cursor: pointer; }
+#chat-form { display: flex; gap: 8px; padding: 0 12px 6px; }
+#chat-form textarea { flex: 1; resize: none; border: 1px solid var(--line); border-radius: 10px; padding: 7px 9px; font: inherit; font-size: 14px; }
+#chat-form button { border: 0; background: var(--fg); color: #fff; border-radius: 10px; padding: 0 14px; cursor: pointer; }
+.chat-foot { font-size: 11.5px; padding: 0 12px 9px; }
+#chat-settings { padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 13.5px; display: flex; flex-direction: column; gap: 6px; background: #fafbfc; }
+#chat-settings[hidden], #chat-settings .base-row[hidden] { display: none; }
+#chat-settings p { margin: 0 0 4px; font-size: 12.5px; line-height: 1.55; }
+#chat-settings label { display: flex; flex-direction: column; gap: 2px; }
+#chat-settings input, #chat-settings select { font: inherit; padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px; }
+#chat-settings .row { display: flex; gap: 8px; margin-top: 4px; }
+#chat-settings .row button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 4px 12px; cursor: pointer; }
+#chat-settings .row button[type=submit] { background: var(--fg); color: #fff; border-color: var(--fg); }
+.picker { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: flex-end; }
+.picker label { display: flex; flex-direction: column; font-size: 13px; color: var(--muted); gap: 3px; }
+.picker select, .picker input { font: inherit; font-size: 15px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px; color: var(--fg); background: #fff; }
+.picker button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 14px; }
+.picker .data-note { flex-basis: 100%; }
+.clabel { font-size: 10px; fill: #c2410c; text-anchor: middle; font-weight: 600; }
+.book.general::before { content: "📘 通用讲法（书中细节以原书为准）"; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 10px; margin: 12px 0; }
+.gallery .g { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; grid-template-columns: 52px 1fr; gap: 4px 10px; font-size: 14px; line-height: 1.6; }
+.gallery .g .pic { grid-row: span 3; text-align: center; }
+.gallery .g .pic small { display: block; color: var(--muted); font-size: 11px; }
+.gallery .g b.t { font-size: 15px; }
+.gallery .g .rule { color: var(--muted); font-size: 12.5px; }
+.gallery .g a { color: #1d4ed8; cursor: pointer; font-size: 12.5px; }
+.gallery .g.none { opacity: .55; }
+.pair { display: flex; gap: 28px; align-items: flex-end; justify-content: center; padding: 8px; }
+.pair div { text-align: center; font-size: 13px; color: var(--muted); }
+.q .mini { display: block; margin: 8px 0; }
+#recent-rows .mini { width: 26px; height: 44px; }
+#recent-rows td { vertical-align: middle; padding-top: 3px; padding-bottom: 3px; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">← 学习计划总览</a>　·　<a href="ch01.html">上一章</a></nav>
+<h1>第 2 章　蜡烛图的构成和分析</h1>
+<p class="sub">《日本蜡烛图分析技术从入门到精通》Wayne A. Corbitt 著，梁岩、刘璐 译 · 对应原书 第 17–26 页 · 第 2 天</p>
+
+<div class="picker card">
+  <label>例子用哪只股票 <select id="pick-sym"></select></label>
+  <label>看哪一天 <input id="pick-date" type="date"></label>
+  <button id="pick-latest" type="button">回到最新交易日</button>
+  <div class="data-note" id="data-note">正在加载数据…</div>
+</div>
+<div class="scheme">图表配色：
+  <button data-scheme-btn="book">书中样式</button>
+  <button data-scheme-btn="us">绿涨红跌（美股软件）</button>
+  <button data-scheme-btn="cn">红涨绿跌（国内软件）</button>
+</div>
+
+<div class="card">
+  <b>今天学完你应该能做到：</b>
+  <ol>
+    <li>用<b>颜色 → 实体长短 → 影线</b>三步读懂任意一根蜡烛。</li>
+    <li>认出基本蜡烛线：长实体、短实体、纺锤线、光头光脚、长上影/长下影，以及四种十字星。</li>
+    <li>知道同一种蜡烛<b>出现的位置不同，意义也不同</b>。</li>
+  </ol>
+  建议用时：读书 30 分钟 + 本页实战 30 分钟 + 练习题 10 分钟。<br>
+  <span class="muted">说明：本章只抽样核对过开篇一页。标「📘 通用讲法」的框是标准的蜡烛图知识，书中的具体说法和划分标准请以原书为准；本页的自动分类阈值也是本笔记自己定的。</span>
+</div>
+
+<h2>2.1　同一组数据，两种画法<span class="page">p.17，图 2-1</span></h2>
+<div class="book">要点：蜡烛图和条形图用的是<b>同一组数据</b>（开盘、最高、最低、收盘），区别在画法。蜡烛图把开盘价和收盘价之间画成实体并上色，更容易读出当天参与者的心理。单根蜡烛反映的是短期情况；作者在后面章节会把它放进更长的时间框架里，配合趋势和价格动能一起用。本章先打基础：认识基本的蜡烛线。</div>
+<div class="practice"><h4>🔍 <span data-v="label"></span> <span data-v="date"></span>：条形图和蜡烛图并排</h4>
+<div class="pair"><div><span data-h="miniBar"></span>条形图</div><div><span data-h="miniCandle"></span>蜡烛图</div></div>
+<p>两张图用的是完全相同的四个价格：开 <span data-v="o"></span>、高 <span data-v="h"></span>、低 <span data-v="l"></span>、收 <span data-v="c"></span>。条形图要看左右两个小横杠谁高谁低；蜡烛图看实体的颜色就够了。</p></div>
+
+<h2>2.2　读一根蜡烛的三步</h2>
+<p><b>第一步看颜色</b>：阳烛（收盘 &gt; 开盘）还是阴烛（收盘 &lt; 开盘），说明当天盘中谁赢了（第 1 章）。<br>
+<b>第二步看实体长短</b>：赢得多还是赢得少。<br>
+<b>第三步看影线</b>：盘中去过哪些价格、又被市场拒绝了。</p>
+
+<h3>实体：长与短</h3>
+<div class="book general">实体的长短要和<b>这只股票最近的平均水平</b>比，不能只看绝对值：同样 5 美元的实体，对一只 50 美元的股票是大事，对一只 500 美元的股票可能很普通。长实体说明一方力量强；短实体说明多空接近、方向不明。</div>
+<div class="practice"><h4>🔍 <span data-v="date"></span> 的实体</h4>
+<div class="kpi">
+  <div><b data-v="B"></b><span>当天实体（|收盘 − 开盘|）</span></div>
+  <div><b data-v="avgB"></b><span>最近 20 天平均实体</span></div>
+  <div><b data-v="bodyX"></b><span>是平均的几倍</span></div>
+  <div><b data-v="R"></b><span>当天振幅（最高 − 最低）</span></div>
+</div>
+<p data-h="body"></p></div>
+
+<h3>影线：被拒绝的价格</h3>
+<div class="book general">影线记录的是<b>盘中去过、但没有守住</b>的价格。长上影线：价格曾被推高，最后被卖方压回；长下影线：价格曾被打低，最后被买方拉回。影线越长，被「拒绝」的程度越明显。</div>
+<div class="practice"><h4>🔍 <span data-v="date"></span> 的影线</h4><p data-h="shadow"></p></div>
+
+<h2>2.3　基本蜡烛线图鉴</h2>
+<div class="book general">开盘价和收盘价几乎相同的蜡烛叫<b>十字星</b>，代表多空平衡。根据影线的位置，又分成普通十字、长腿十字、墓碑十字、蜻蜓十字。十字星本身不代表涨或跌，它的意义取决于<b>出现在什么位置</b>：在一段明显的趋势之后出现，往往提示原来的力量在减弱。</div>
+<p>下面每张卡片画的都是<b><span data-v="label"></span> 最近一年里真实出现过的蜡烛</b>（离你选的日期最近的那一根），点「看这一天」可以把整页切到那一天。</p>
+<div class="gallery" id="gallery"></div>
+<details class="card"><summary><b>本页的自动分类标准</b>（点开看；书中标准可能不同，以原书为准）</summary>
+<p style="font-size:14px">记号：振幅 R = 最高 − 最低，实体 B = |收盘 − 开盘|，上影 U、下影 L；「平均」指此前 20 个交易日的平均实体 / 平均振幅。按下面的顺序判断，先符合哪条就归哪类：</p>
+<ol style="font-size:14px">
+  <li><b>十字星</b>：B ≤ 10% R。其中 L ≤ 10% R 且 U ≥ 60% R 为墓碑十字；U ≤ 10% R 且 L ≥ 60% R 为蜻蜓十字；U、L 都 ≥ 30% R 且 R ≥ 1.3 倍平均振幅为长腿十字；其余为普通十字星。</li>
+  <li><b>光头光脚</b>：U、L 都 ≤ 5% R，且实体不短于平均实体。</li>
+  <li><b>高浪线</b>：B ≤ 25% R，U、L 都 ≥ 30% R，且 R ≥ 1.5 倍平均振幅。</li>
+  <li><b>纺锤线</b>：B ≤ 30% R，且上下影线都比实体长。</li>
+  <li><b>长实体</b>：B ≥ 1.5 倍平均实体，且 B ≥ 60% R（另注明是否光头 / 光脚）。</li>
+  <li><b>长上影线 / 长下影线</b>：该影线 ≥ 2 倍实体且 ≥ 50% R。</li>
+  <li><b>短实体</b>：B ≤ 0.5 倍平均实体。</li>
+  <li>都不符合：<b>普通蜡烛</b>。</li>
+</ol></details>
+
+<h2>2.4　位置决定意义</h2>
+<p>同样一根十字星，出现在连续上涨之后，说明买方可能累了；出现在横盘中间，往往没什么特别的意思。本页给每根蜡烛都标了它前 5 天的涨跌，方便你判断「它出现在哪里」。具体怎么用位置来确认反转，是第 3 章的主题。</p>
+
+<h2>🎯 今日实战：给 <span data-v="label"></span> 最近 60 根蜡烛分类</h2>
+<div class="chart-box" id="c-sixty"></div>
+<p class="muted" style="font-size:14px">蜡烛下方的小字是类型代号：长＝长实体，小＝短实体，纺＝纺锤线，光＝光头光脚，浪＝高浪线，上/下＝长上影/长下影，十＝十字星，腿＝长腿十字，墓＝墓碑十字，蜓＝蜻蜓十字；没有字的是普通蜡烛。点任意一根可以拿去「问这一页」。</p>
+<div class="practice">
+<h4>你选的这一天</h4>
+<p data-h="verdict"></p>
+<h4>近 60 天的蜡烛分布</h4>
+<table><thead><tr><th>类型</th><th>次数</th><th>占比</th></tr></thead><tbody id="dist-rows"></tbody></table>
+<p data-h="distNote"></p>
+<h4>最近 10 根逐根解读</h4>
+<table><thead><tr><th>日期</th><th>蜡烛</th><th>类型</th><th>位置</th><th>当天涨跌</th></tr></thead><tbody id="recent-rows"></tbody></table>
+</div>
+
+<h2>✍️ 练习题</h2>
+<div id="quiz"></div>
+<span id="score"></span>
+
+<h2>📌 本章小结</h2>
+<div class="book general">要点回顾：蜡烛图和条形图数据相同、画法不同；读一根蜡烛先看<b>颜色</b>（谁赢了）、再看<b>实体长短</b>（赢得多不多）、最后看<b>影线</b>（盘中哪些价格被拒绝）。同一种蜡烛在不同位置意义不同，具体的反转和持续形态是第 3、4 章的内容。</div>
+<div class="terms">
+  <div><b>长实体 / 短实体</b>和最近平均实体比，长 = 一方明显占优，短 = 力量接近</div>
+  <div><b>上影线 / 下影线</b>盘中去过但没守住的价格</div>
+  <div><b>纺锤线</b>小实体、上下影线都比实体长：犹豫</div>
+  <div><b>光头光脚</b>几乎没有影线：一方全天控制</div>
+  <div><b>十字星</b>开盘 ≈ 收盘：多空平衡</div>
+  <div><b>长腿 / 墓碑 / 蜻蜓十字</b>十字星按影线位置细分</div>
+  <div><b>高浪线</b>振幅大、实体小：失去方向感</div>
+  <div><b>位置</b>同一根蜡烛在上涨后、下跌后、横盘中意义不同</div>
+</div>
+
+<h2>➡️ 下一章：第 3 章　蜡烛图的反转形态<span class="page">p.27–69</span></h2>
+<p>把今天认识的单根蜡烛放到趋势里：锤子线、吞没形态、乌云盖顶、启明星……第 3 章篇幅最长，可以分两天学。</p>
+
+<p class="disclaimer">本页是个人学习笔记，书中内容为概括转述，请以原书为准。行情数据来自 Yahoo Finance（每个交易日收盘后自动更新），可能有延迟或误差。所有分析只用于练习读图，不构成投资建议。</p>
+</main>
+<script>
+window.DYNAMIC = true;
+// 轻量 SVG 图表：蜡烛图 / 条形图(OHLC) / 线形图 / 点数图，带成交量与悬停提示。
+// 不依赖任何外部库，离线可用。各章节共用。
+
+const SCHEMES = {
+  book: { name: "书中样式（空心阳烛 / 实心阴烛）", up: "#ffffff", upStroke: "#1f2328", down: "#1f2328", downStroke: "#1f2328", line: "#1f2328" },
+  us:   { name: "美股软件（绿涨红跌）", up: "#1a9e5c", upStroke: "#1a9e5c", down: "#d1453b", downStroke: "#d1453b", line: "#2563eb" },
+  cn:   { name: "国内软件（红涨绿跌）", up: "#d1453b", upStroke: "#d1453b", down: "#1a9e5c", downStroke: "#1a9e5c", line: "#2563eb" },
+};
+let scheme = localStorage.getItem("cs-scheme") || "book";
+const charts = new Map();   // 容器 id → 图表；同一容器重画时替换，不会叠加
+
+function setScheme(s) {
+  scheme = s;
+  localStorage.setItem("cs-scheme", s);
+  document.querySelectorAll("[data-scheme-btn]").forEach(b => b.classList.toggle("on", b.dataset.schemeBtn === s));
+  charts.forEach(c => c.draw());
+}
+
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+const fmt = n => n.toFixed(2);
+const fmtVol = v => (v / 1e6).toFixed(1) + "M";
+
+function tooltip(box) {
+  let t = box.querySelector(".tip");
+  if (!t) { t = document.createElement("div"); t.className = "tip"; box.appendChild(t); }
+  return t;
+}
+
+// opts: {type:'candle'|'bar'|'line', rows, volume:bool, height, marks:{date:label}, lines:[{y,label,color}]}
+function priceChart(container, opts) {
+  const box = typeof container === "string" ? document.getElementById(container) : container;
+  const chart = { draw };
+  charts.set(box.id, chart);
+
+  function draw() {
+    const S = SCHEMES[scheme];
+    box.querySelectorAll("svg").forEach(s => s.remove());
+    const rows = opts.rows;
+    const W = 900, H = opts.height || 380;
+    const padL = 8, padR = 58, padT = 14;
+    const volH = opts.volume ? 70 : 0;
+    const priceH = H - padT - volH - 26;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart" }, null);
+    box.prepend(svg);
+
+    const lo = Math.min(...rows.map(r => opts.type === "line" ? r.c : r.l));
+    const hi = Math.max(...rows.map(r => opts.type === "line" ? r.c : r.h));
+    const pad = (hi - lo) * 0.06;
+    const yMin = lo - pad, yMax = hi + pad;
+    const y = p => padT + (yMax - p) / (yMax - yMin) * priceH;
+    const step = (W - padL - padR) / rows.length;
+    const x = i => padL + step * (i + 0.5);
+    const bw = Math.max(1.5, step * 0.62);
+
+    // 网格 + 价格刻度
+    for (let k = 0; k <= 4; k++) {
+      const p = yMin + (yMax - yMin) * k / 4;
+      el("line", { x1: padL, x2: W - padR, y1: y(p), y2: y(p), class: "grid" }, svg);
+      el("text", { x: W - padR + 6, y: y(p) + 4, class: "axis" }, svg).textContent = p.toFixed(0);
+    }
+    // 月份刻度
+    let lastM = "";
+    rows.forEach((r, i) => {
+      const m = r.date.slice(0, 7);
+      if (m !== lastM) {
+        lastM = m;
+        el("line", { x1: x(i), x2: x(i), y1: padT, y2: H - 20, class: "grid faint" }, svg);
+        el("text", { x: x(i) + 3, y: H - 6, class: "axis" }, svg).textContent = +r.date.slice(5, 7) + "月";
+      }
+    });
+
+    (opts.lines || []).forEach(L => {
+      el("line", { x1: padL, x2: W - padR, y1: y(L.y), y2: y(L.y), stroke: L.color || "#c2410c", "stroke-dasharray": "5 4", "stroke-width": 1.2 }, svg);
+      el("text", { x: padL + 4, y: y(L.y) - 4, class: "axis", fill: L.color || "#c2410c" }, svg).textContent = L.label;
+    });
+
+    if (opts.type === "line") {
+      const d = rows.map((r, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(r.c).toFixed(1)).join(" ");
+      el("path", { d, fill: "none", stroke: S.line, "stroke-width": 1.8 }, svg);
+    }
+
+    const vMax = Math.max(...rows.map(r => r.v));
+    rows.forEach((r, i) => {
+      const up = r.c >= r.o;
+      const g = el("g", {}, svg);
+      if (opts.type === "candle") {
+        el("line", { x1: x(i), x2: x(i), y1: y(r.h), y2: y(r.l), stroke: up ? S.upStroke : S.downStroke, "stroke-width": 1 }, g);
+        const top = y(Math.max(r.o, r.c)), bot = y(Math.min(r.o, r.c));
+        el("rect", { x: x(i) - bw / 2, y: top, width: bw, height: Math.max(1, bot - top),
+                     fill: up ? S.up : S.down, stroke: up ? S.upStroke : S.downStroke, "stroke-width": 1 }, g);
+      } else if (opts.type === "bar") {
+        const c = up ? S.upStroke : S.downStroke;
+        el("line", { x1: x(i), x2: x(i), y1: y(r.h), y2: y(r.l), stroke: c, "stroke-width": 1.2 }, g);
+        el("line", { x1: x(i) - bw / 2, x2: x(i), y1: y(r.o), y2: y(r.o), stroke: c, "stroke-width": 1.2 }, g);
+        el("line", { x1: x(i), x2: x(i) + bw / 2, y1: y(r.c), y2: y(r.c), stroke: c, "stroke-width": 1.2 }, g);
+      }
+      if (opts.volume) {
+        const vh = r.v / vMax * (volH - 8);
+        el("rect", { x: x(i) - bw / 2, y: H - 22 - vh, width: bw, height: vh,
+                     fill: opts.type === "line" ? "#9aa4b2" : (up ? S.upStroke : S.downStroke), opacity: 0.45 }, g);
+      }
+      if (opts.labels && opts.labels[r.date]) {   // 每根蜡烛下方的小标签（如第 2 章的类型代号）
+        el("text", { x: x(i), y: Math.min(y(r.l) + 13, padT + priceH + 10), class: "clabel" }, svg).textContent = opts.labels[r.date];
+      }
+      if (opts.marks && opts.marks[r.date]) {
+        el("circle", { cx: x(i), cy: y(r.h) - 12, r: 9, class: "mark" }, svg);
+        el("text", { x: x(i), y: y(r.h) - 8, class: "markt" }, svg).textContent = opts.marks[r.date];
+      }
+      // 悬停热区
+      const hit = el("rect", { x: x(i) - step / 2, y: 0, width: step, height: H, fill: "transparent" }, svg);
+      hit.addEventListener("mousemove", ev => {
+        const t = tooltip(box);
+        const prev = rows[i - 1];
+        const chg = prev ? ((r.c / prev.c - 1) * 100).toFixed(2) + "%" : "—";
+        t.innerHTML = `<b>${r.date}</b><br>开 ${fmt(r.o)}　高 ${fmt(r.h)}<br>低 ${fmt(r.l)}　收 ${fmt(r.c)}<br>` +
+          `较前收 ${chg}　量 ${fmtVol(r.v)}<br><span class="${up ? "u" : "d"}">${up ? "阳烛：收盘 ≥ 开盘" : "阴烛：收盘 < 开盘"}</span>`;
+        const rect = box.getBoundingClientRect();
+        t.style.left = Math.min(ev.clientX - rect.left + 14, rect.width - 190) + "px";
+        t.style.top = (ev.clientY - rect.top + 10) + "px";
+        t.style.display = "block";
+      });
+      hit.addEventListener("mouseleave", () => tooltip(box).style.display = "none");
+      hit.addEventListener("click", () => window.csSelectCandle && window.csSelectCandle(r));
+      hit.style.cursor = "pointer";
+    });
+    if (opts.volume) el("text", { x: padL + 4, y: H - 22 - volH + 14, class: "axis" }, svg).textContent = "成交量";
+  }
+  draw();
+  return chart;
+}
+
+// 点数图：cols = [{type, top, bottom, start, end}], box = 格子大小
+function pnfChart(container, cols, boxSize) {
+  const box = document.getElementById(container);
+  box.querySelectorAll("svg").forEach(s => s.remove());
+  const lo = Math.min(...cols.map(c => c.bottom)), hi = Math.max(...cols.map(c => c.top));
+  const n = Math.round((hi - lo) / boxSize) + 1;
+  const cell = 15, padL = 8, padR = 58, padT = 10;
+  const W = Math.max(900, padL + padR + cols.length * cell), H = padT * 2 + n * cell + 20;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart" }, null);
+  box.prepend(svg);
+  const y = p => padT + (hi - p) / boxSize * cell;
+  for (let k = 0; k < n; k += 4) {
+    const p = hi - k * boxSize;
+    el("line", { x1: padL, x2: W - padR, y1: y(p) + cell / 2, y2: y(p) + cell / 2, class: "grid" }, svg);
+    el("text", { x: W - padR + 6, y: y(p) + cell / 2 + 4, class: "axis" }, svg).textContent = p.toFixed(0);
+  }
+  cols.forEach((c, i) => {
+    const cx = padL + i * cell + cell / 2;
+    for (let p = c.bottom; p <= c.top + 1e-9; p += boxSize) {
+      const cy = y(p) + cell / 2;
+      if (c.type === "X") {
+        el("path", { d: `M${cx - 5} ${cy - 5}L${cx + 5} ${cy + 5}M${cx + 5} ${cy - 5}L${cx - 5} ${cy + 5}`, stroke: "#1a9e5c", "stroke-width": 1.6 }, svg);
+      } else {
+        el("circle", { cx, cy, r: 5, fill: "none", stroke: "#d1453b", "stroke-width": 1.6 }, svg);
+      }
+    }
+    const hit = el("rect", { x: cx - cell / 2, y: 0, width: cell, height: H, fill: "transparent" }, svg);
+    hit.addEventListener("mousemove", ev => {
+      const t = tooltip(box);
+      t.innerHTML = `<b>第 ${i + 1} 列：${c.type === "X" ? "X（上涨）" : "O（下跌）"}</b><br>${c.bottom.toFixed(0)} → ${c.top.toFixed(0)}<br>${c.start} ~ ${c.end}<br><span class="muted">注意：点数图本身不显示日期，这里是额外标注</span>`;
+      const rect = box.getBoundingClientRect();
+      t.style.left = Math.min(ev.clientX - rect.left + 14, rect.width - 200) + "px";
+      t.style.top = (ev.clientY - rect.top + 10) + "px";
+      t.style.display = "block";
+    });
+    hit.addEventListener("mouseleave", () => tooltip(box).style.display = "none");
+  });
+}
+
+// 迷你蜡烛 / 条形（返回 SVG 字符串，用于图鉴卡片和练习题；按自身最高最低缩放）
+function miniCandle(r, w = 44, h = 74) {
+  const S = SCHEMES[scheme], up = r.c >= r.o, pad = 4, R = (r.h - r.l) || 1;
+  const y = p => pad + (r.h - p) / R * (h - 2 * pad), cx = w / 2;
+  const top = y(Math.max(r.o, r.c)), bot = y(Math.min(r.o, r.c));
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" class="mini"><line x1="${cx}" x2="${cx}" y1="${y(r.h)}" y2="${y(r.l)}" stroke="${up ? S.upStroke : S.downStroke}" stroke-width="1.5"/>` +
+    `<rect x="${cx - w * 0.22}" y="${top}" width="${w * 0.44}" height="${Math.max(1.5, bot - top)}" fill="${up ? S.up : S.down}" stroke="${up ? S.upStroke : S.downStroke}" stroke-width="1.5"/></svg>`;
+}
+function miniBar(r, w = 44, h = 74) {
+  const S = SCHEMES[scheme], up = r.c >= r.o, pad = 4, R = (r.h - r.l) || 1, c = up ? S.upStroke : S.downStroke;
+  const y = p => pad + (r.h - p) / R * (h - 2 * pad), cx = w / 2;
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" class="mini"><g stroke="${c}" stroke-width="1.8"><line x1="${cx}" x2="${cx}" y1="${y(r.h)}" y2="${y(r.l)}"/>` +
+    `<line x1="${cx - 10}" x2="${cx}" y1="${y(r.o)}" y2="${y(r.o)}"/><line x1="${cx}" x2="${cx + 10}" y1="${y(r.c)}" y2="${y(r.c)}"/></g></svg>`;
+}
+
+// 单根蜡烛解剖图
+function anatomy(container, r) {
+  const box = document.getElementById(container);
+  const draw = () => {
+    const S = SCHEMES[scheme];
+    box.querySelectorAll("svg").forEach(s => s.remove());
+    const W = 420, H = 300, pad = 30;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart small" }, null);
+    box.prepend(svg);
+    const y = p => pad + (r.h - p) / (r.h - r.l) * (H - 2 * pad);
+    const up = r.c >= r.o, cx = 120;
+    el("line", { x1: cx, x2: cx, y1: y(r.h), y2: y(r.l), stroke: up ? S.upStroke : S.downStroke, "stroke-width": 2 }, svg);
+    const top = y(Math.max(r.o, r.c)), bot = y(Math.min(r.o, r.c));
+    el("rect", { x: cx - 28, y: top, width: 56, height: Math.max(2, bot - top), fill: up ? S.up : S.down, stroke: up ? S.upStroke : S.downStroke, "stroke-width": 2 }, svg);
+    const label = (p, txt) => {
+      el("line", { x1: cx + 34, x2: 200, y1: y(p), y2: y(p), stroke: "#8b949e", "stroke-dasharray": "3 3" }, svg);
+      el("text", { x: 206, y: y(p) + 5, class: "lbl" }, svg).textContent = txt;
+    };
+    label(r.h, `最高价 ${fmt(r.h)}`);
+    label(up ? r.c : r.o, (up ? "收盘价 " + fmt(r.c) : "开盘价 " + fmt(r.o)));
+    label(up ? r.o : r.c, (up ? "开盘价 " + fmt(r.o) : "收盘价 " + fmt(r.c)));
+    label(r.l, `最低价 ${fmt(r.l)}`);
+    el("text", { x: 20, y: (y(r.h) + top) / 2 + 4, class: "lbl muted" }, svg).textContent = "上影线";
+    el("text", { x: 20, y: (top + bot) / 2 + 4, class: "lbl muted" }, svg).textContent = "实体";
+    el("text", { x: 20, y: (bot + y(r.l)) / 2 + 4, class: "lbl muted" }, svg).textContent = "下影线";
+  };
+  charts.set(container, { draw });
+  draw();
+}
+
+function quiz() {
+  const s0 = document.getElementById("score");
+  if (s0) s0.textContent = `已答 0 / ${document.querySelectorAll(".q").length}`;
+  document.querySelectorAll(".q").forEach(q => {
+    q.querySelectorAll("button.opt").forEach(b => b.addEventListener("click", () => {
+      if (q.classList.contains("done")) return;
+      q.classList.add("done");
+      b.dataset.chosen = "1";
+      b.classList.add(b.dataset.ok === "1" ? "right" : "wrong");
+      q.querySelector('button.opt[data-ok="1"]').classList.add("right");
+      q.querySelector(".exp").style.display = "block";
+      const s = document.getElementById("score");
+      if (s) {
+        const done = document.querySelectorAll(".q.done").length;
+        const correct = document.querySelectorAll('.q button[data-chosen="1"][data-ok="1"]').length;
+        s.textContent = `已答 ${done} / ${document.querySelectorAll(".q").length}，答对 ${correct}`;
+      }
+    }));
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("[data-scheme-btn]").forEach(b => b.addEventListener("click", () => setScheme(b.dataset.schemeBtn)));
+  setScheme(scheme);
+  document.querySelectorAll(".tabs").forEach(tabs => {
+    tabs.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+      tabs.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+      const group = tabs.dataset.group;
+      document.querySelectorAll(`[data-pane="${group}"]`).forEach(p => p.hidden = p.dataset.key !== b.dataset.key);
+    }));
+  });
+  if (!window.DYNAMIC) quiz();   // 动态页面在渲染完题目后自己调用 quiz()
+});
+
+// 第 2 章：基本蜡烛线的自动分类。纯函数，浏览器和 Node 共用。
+// 阈值是本笔记采用的通用标准（相对最近 20 天的平均实体/振幅），书中细节可能略有不同，以原书为准。
+
+(function (root) {
+  const f2 = n => n.toFixed(2);
+  const pct = (a, b) => (a / b - 1) * 100;
+
+  // 类型表：code 用于图上的小标签；meaning 是心理含义（自己的话）
+  const TYPES = {
+    doji:       { name: "十字星", code: "十", meaning: "开盘价和收盘价几乎一样：多空打成平手。持续上涨或下跌之后出现，说明原来那一方的力量可能在减弱。" },
+    longleg:    { name: "长腿十字", code: "腿", meaning: "盘中上下都走得很远，最后又回到开盘价附近：市场非常犹豫，谁也说服不了谁。" },
+    gravestone: { name: "墓碑十字", code: "墓", meaning: "盘中冲高，最后全部跌回开盘价附近：上方的抛压把买方打了回去。出现在上涨之后更值得警惕。" },
+    dragonfly:  { name: "蜻蜓十字", code: "蜓", meaning: "盘中下探，最后全部拉回开盘价附近：下方有人接盘。出现在下跌之后更值得留意。" },
+    marubozu:   { name: "光头光脚", code: "光", meaning: "几乎没有影线：阳线开盘就是最低、收盘就是最高（阴线反之）。一整天由一方完全控制。" },
+    highwave:   { name: "高浪线", code: "浪", meaning: "振幅很大、实体很小、上下影线都长：市场剧烈摇摆，失去方向感。" },
+    spinning:   { name: "纺锤线", code: "纺", meaning: "实体小、上下影线都比实体长：多空都试过推价格，但都没成功，力量接近平衡。" },
+    longbody:   { name: "长实体", code: "长", meaning: "实体明显比最近的平均水平长：一方从开盘到收盘一路占优，力度大。" },
+    uppershadow:{ name: "长上影线", code: "上", meaning: "上影线很长：盘中更高的价格被市场拒绝了，上方有卖压。（第 3 章的「流星线」「倒锤子」就属于这一类）" },
+    lowershadow:{ name: "长下影线", code: "下", meaning: "下影线很长：盘中更低的价格被市场拒绝了，下方有买盘。（第 3 章的「锤子线」「上吊线」就属于这一类）" },
+    shortbody:  { name: "短实体", code: "小", meaning: "实体比最近的平均水平短很多：当天多空力量接近，方向感不强。" },
+    normal:     { name: "普通蜡烛", code: "", meaning: "实体和影线都在正常范围内，没有特别突出的特征，要结合前后几根一起看。" },
+  };
+  const ORDER = ["longbody", "marubozu", "shortbody", "spinning", "highwave", "uppershadow", "lowershadow", "doji", "longleg", "gravestone", "dragonfly"];
+
+  function stats(rows, k) {
+    const seg = rows.slice(Math.max(0, k - 20), k);
+    return { avgB: seg.reduce((s, r) => s + Math.abs(r.c - r.o), 0) / seg.length,
+             avgR: seg.reduce((s, r) => s + (r.h - r.l), 0) / seg.length };
+  }
+
+  function classify(rows, k) {
+    const r = rows[k], { avgB, avgR } = stats(rows, k);
+    const R = r.h - r.l, B = Math.abs(r.c - r.o), U = r.h - Math.max(r.o, r.c), Lw = Math.min(r.o, r.c) - r.l;
+    const up = r.c >= r.o;
+    const out = { k, date: r.date, r, R, B, U, Lw, up, avgB, avgR, bodyX: avgB ? B / avgB : 0, rangeX: avgR ? R / avgR : 0 };
+    let t = "normal", side = "";
+    if (R <= 0) t = "doji";
+    else if (B <= 0.1 * R) {
+      t = Lw <= 0.1 * R && U >= 0.6 * R ? "gravestone" : U <= 0.1 * R && Lw >= 0.6 * R ? "dragonfly"
+        : U >= 0.3 * R && Lw >= 0.3 * R && R >= 1.3 * avgR ? "longleg" : "doji";
+    } else if (U <= 0.05 * R && Lw <= 0.05 * R && B >= avgB) t = "marubozu";
+    else if (B <= 0.25 * R && U >= 0.3 * R && Lw >= 0.3 * R && R >= 1.5 * avgR) t = "highwave";
+    else if (B <= 0.3 * R && U > B && Lw > B) t = "spinning";
+    else if (B >= 1.5 * avgB && B >= 0.6 * R) {
+      t = "longbody";
+      side = U <= 0.05 * R ? (up ? "，收在最高价（光头）" : "，开在最高价（光头）") : Lw <= 0.05 * R ? (up ? "，开在最低价（光脚）" : "，收在最低价（光脚）") : "";
+    } else if (U >= 2 * B && U >= 0.5 * R) t = "uppershadow";
+    else if (Lw >= 2 * B && Lw >= 0.5 * R) t = "lowershadow";
+    else if (B <= 0.5 * avgB) t = "shortbody";
+    out.type = t;
+    const isDoji = ["doji", "longleg", "gravestone", "dragonfly"].includes(t);
+    out.name = isDoji || t === "highwave" || t === "spinning" ? TYPES[t].name
+      : t === "normal" ? (up ? "普通阳线" : "普通阴线")
+      : t === "longbody" ? (up ? "长阳线" : "长阴线") + side
+      : t === "shortbody" ? (up ? "小阳线" : "小阴线")
+      : t === "marubozu" ? (up ? "光头光脚阳线" : "光头光脚阴线")
+      : TYPES[t].name + (up ? "（阳）" : "（阴）");
+    // 出现在什么位置：前 5 天的涨跌
+    out.prior = k >= 6 ? pct(rows[k - 1].c, rows[k - 6].c) : 0;
+    out.where = out.prior >= 3 ? `出现在一段上涨之后（前 5 天 +${out.prior.toFixed(1)}%）`
+      : out.prior <= -3 ? `出现在一段下跌之后（前 5 天 ${out.prior.toFixed(1)}%）` : `出现在横盘中（前 5 天 ${out.prior >= 0 ? "+" : ""}${out.prior.toFixed(1)}%）`;
+    return out;
+  }
+
+  const MIN_INDEX = 270;
+
+  function computeCh2(rows, i) {
+    const V = { i, last: rows[i], prev: rows[i - 1] };
+    V.cur = classify(rows, i);
+    V.sixty = rows.slice(i - 59, i + 1);
+    V.year = rows.slice(i - 251, i + 1);
+    V.cls60 = V.sixty.map((_, j) => classify(rows, i - 59 + j));
+    // 每种类型：最近一年里离所选日最近的真实例子 + 近 60 天出现次数
+    V.examples = {};
+    for (let k = i; k > i - 250; k--) {
+      const c = classify(rows, k);
+      if (!V.examples[c.type]) V.examples[c.type] = c;
+    }
+    V.count60 = {};
+    V.cls60.forEach(c => { V.count60[c.type] = (V.count60[c.type] || 0) + 1; });
+    V.recent10 = V.cls60.slice(-10).reverse();
+    V.text = texts(V);
+    return V;
+  }
+
+  function texts(V) {
+    const c = V.cur, r = c.r, T = {};
+    const p = x => (c.R ? (x / c.R * 100).toFixed(0) : "0") + "%";
+    T.body = `${r.date} 的实体是 <b>${f2(c.B)}</b>（开盘 ${f2(r.o)} → 收盘 ${f2(r.c)}），最近 20 天平均实体是 <b>${f2(c.avgB)}</b>，` +
+      `所以这一天的实体是平均水平的 <b>${c.bodyX.toFixed(1)} 倍</b>：` +
+      (c.bodyX >= 1.5 ? "属于<b>长实体</b>，一方的力量很明显。" : c.bodyX <= 0.5 ? "属于<b>短实体</b>，多空力量接近。" : "长度普通。") +
+      ` 实体占当天振幅（最高 − 最低 = ${f2(c.R)}）的 <b>${p(c.B)}</b>。`;
+    T.shadow = `上影线 <b>${f2(c.U)}</b>（占振幅 ${p(c.U)}），下影线 <b>${f2(c.Lw)}</b>（占振幅 ${p(c.Lw)}）。` +
+      (c.U > 2 * Math.max(c.B, 1e-9) && c.U >= 0.5 * c.R ? "上影线很长：盘中冲高的价格没有守住，上方有卖压。"
+        : c.Lw > 2 * Math.max(c.B, 1e-9) && c.Lw >= 0.5 * c.R ? "下影线很长：盘中下探的价格被拉了回来，下方有买盘。"
+        : c.U + c.Lw < 0.2 * c.R ? "两边影线都很短：价格几乎没有在实体之外停留，方向很明确。"
+        : "影线长度不算突出。");
+    T.verdict = `按本页的分类标准，${r.date} 是一根 <b>${c.name}</b>，${c.where}。${TYPES[c.type].meaning}`;
+    return T;
+  }
+
+  function notesCh2(sym, zh, V) {
+    const c = V.cur, strip = s => s.replace(/<[^>]+>/g, "");
+    const dist = Object.entries(V.count60).sort((a, b) => b[1] - a[1]).map(([t, n]) => `${TYPES[t].name} ${n}`).join("、");
+    return [
+      `${zh}（${sym}）${c.date}：${c.name}，${c.where}。`,
+      strip(V.text.body), strip(V.text.shadow),
+      `近 60 天的蜡烛分布：${dist}。`,
+    ];
+  }
+
+  const api = { TYPES, ORDER, classify, computeCh2, notesCh2, MIN_INDEX };
+  if (typeof module !== "undefined") module.exports = api; else root.CH2 = api;
+})(this);
+
+// 「问这一页」聊天框：右下角入口，把当前页文字 + MSFT 数据 + 问题交给模型回答。
+// 两种后端：
+//   - 本机（通过 http://127.0.0.1:8765 打开）：走 chat_server.py → 本机 claude，用页面作者自己的凭据。
+//   - 其他（公网 GitHub Pages、别人下载的 file://）：访客自带 API 密钥（BYOK），密钥只存在访客自己浏览器的
+//     localStorage 里，请求从浏览器直接发给访客选的服务商，绝不经过、也不会用到页面作者的凭据。
+
+(function () {
+  const SERVER = "http://127.0.0.1:8765";
+  const LOCAL = location.origin === SERVER;
+  const KEY = "cs-chat:" + location.pathname;
+  const CFG_KEY = "cs-chat-byok";
+  let history = JSON.parse(localStorage.getItem(KEY) || "[]");
+  let candle = null;
+
+  // 与 chat_server.py 的 SYSTEM 保持一致
+  const SYSTEM = `你是一位耐心的蜡烛图（K 线）学习助教。学习者零基础，正在读《日本蜡烛图分析技术从入门到精通》
+（Wayne A. Corbitt 著），目标是在实战中看懂走势、知道对应哪个知识点。所有例子用微软（MSFT）日线。
+
+回答规则：
+- 用简体中文，先给结论再解释；尽量短，必要时用列表。零基础能听懂，术语第一次出现时顺手解释。
+- 以「当前学习页」的内容和随附的 MSFT 数据为依据；引用数字时只用给出的数据，不要编造价格、日期或新闻。
+- 尽量指出问题对应页面里的哪一节（如「1.3 原则 3」）；超出本章的内容可以简单说明，并告诉对方在第几章会细讲。
+- 讲书中观点时用自己的话转述，不要大段复述原书文字。
+- 只做学习讲解：不给买卖建议、不预测具体价格。被问到「该不该买」时，说明这超出学习范围，并转为讲解如何读图。
+- 如果页面和数据里没有足够信息，直说不知道。`;
+
+  const PROVIDERS = {
+    anthropic: { name: "Anthropic（Claude）", models: ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"],
+                 keyHint: "sk-ant-…", keyUrl: "https://console.anthropic.com/settings/keys" },
+    openai: { name: "OpenAI 兼容接口（OpenAI、OpenRouter 等）", models: [], keyHint: "sk-…",
+              baseUrl: "https://api.openai.com/v1" },
+  };
+  let cfg = Object.assign({ provider: "anthropic", model: "claude-opus-5-5", key: "", baseUrl: PROVIDERS.openai.baseUrl },
+                          JSON.parse(localStorage.getItem(CFG_KEY) || "{}"));
+
+  window.csSelectCandle = r => {
+    candle = r;
+    const chip = document.getElementById("chat-candle");
+    if (chip) { chip.hidden = false; chip.querySelector("span").textContent = `已选 K 线：${r.date}`; }
+    open(true);
+  };
+
+  function md(s) {
+    const esc = s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return esc.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/^#{1,4} (.+)$/gm, "<b>$1</b>").replace(/^[-•] (.+)$/gm, "• $1").replace(/\n/g, "<br>");
+  }
+
+  function bubble(role, text) {
+    const d = document.createElement("div");
+    d.className = "msg " + role;
+    d.innerHTML = md(text);
+    const log = document.getElementById("chat-log");
+    log.appendChild(d); log.scrollTop = log.scrollHeight;
+    return d;
+  }
+
+  function open(show) {
+    document.getElementById("chat-panel").hidden = !show;
+    if (show && !LOCAL && !cfg.key) showSettings(true);
+    else if (show) document.getElementById("chat-q").focus();
+  }
+
+  function context(q, sel) {
+    const rows = (window.D && (D.year || D.sixty) || []).map(r => [r.date, r.o, r.h, r.l, r.c, r.v].join(","));
+    return {
+      title: document.title, page: document.querySelector("main").innerText, rows, question: q, history,
+      selection: sel || null,
+      candle: candle ? `${candle.date} 开 ${candle.o} 高 ${candle.h} 低 ${candle.l} 收 ${candle.c} 量 ${candle.v}` : null,
+    };
+  }
+
+  // 与 chat_server.py 的 build_prompt 保持一致
+  function buildPrompt(req) {
+    const parts = [`# 当前学习页：${req.title}\n${req.page.slice(0, 30000)}`];
+    if (req.rows.length) parts.push("# MSFT 日线（date,open,high,low,close,volume）\n" + req.rows.slice(-130).join("\n"));
+    if (req.candle) parts.push(`# 学习者在图上点选的 K 线\n${req.candle}`);
+    if (req.selection) parts.push(`# 学习者选中的页面文字\n${req.selection.slice(0, 2000)}`);
+    const hist = req.history.slice(-10);
+    if (hist.length) parts.push("# 之前的对话\n" + hist.map(h => `${h.role === "user" ? "学习者" : "助教"}：${h.text}`).join("\n"));
+    parts.push(`# 学习者现在的问题\n${req.question}`);
+    return parts.join("\n\n");
+  }
+
+  // 逐块读取流式响应；onEvent 收到每个 SSE data 行（本机服务是纯文本，直接整块给）
+  async function readStream(res, onChunk) {
+    const reader = res.body.getReader(), dec = new TextDecoder();
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) return;
+      onChunk(dec.decode(value, { stream: true }));
+    }
+  }
+
+  function sseLines(onData) {
+    let buf = "";
+    return chunk => {
+      buf += chunk;
+      const lines = buf.split("\n");
+      buf = lines.pop();
+      for (const l of lines) if (l.startsWith("data:")) onData(l.slice(5).trim());
+    };
+  }
+
+  async function askLocal(req, emit) {
+    const res = await fetch(SERVER + "/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(req) });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    await readStream(res, emit);
+  }
+
+  async function askAnthropic(req, emit) {
+    const body = {
+      model: cfg.model, max_tokens: 8000, stream: true, system: SYSTEM,
+      output_config: { effort: "low" },               // 聊天类问题用低 effort，回答更快
+      messages: [{ role: "user", content: buildPrompt(req) }],
+    };
+    const headers = {
+      "content-type": "application/json", "x-api-key": cfg.key, "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true",   // 允许浏览器直连（访客自己的密钥）
+    };
+    if (cfg.model !== "claude-haiku-5-5") {           // 被安全分类器拒答时自动换模型重试
+      headers["anthropic-beta"] = "server-side-fallback-2026-07-01";
+      body.fallbacks = "default";
+    }
+    const res = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers, body: JSON.stringify(body) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}：${(await res.text()).slice(0, 300)}`);
+    await readStream(res, sseLines(d => {
+      const ev = JSON.parse(d);
+      if (ev.type === "content_block_delta" && ev.delta.type === "text_delta") emit(ev.delta.text);
+      else if (ev.type === "error") emit(`\n\n⚠️ ${ev.error.message}`);
+      else if (ev.type === "message_delta" && ev.delta.stop_reason === "refusal") emit("\n\n⚠️ 模型拒绝回答这个问题。");
+    }));
+  }
+
+  async function askOpenAI(req, emit) {
+    const res = await fetch(cfg.baseUrl.replace(/\/$/, "") + "/chat/completions", {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: "Bearer " + cfg.key },
+      body: JSON.stringify({ model: cfg.model, stream: true,
+        messages: [{ role: "system", content: SYSTEM }, { role: "user", content: buildPrompt(req) }] }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}：${(await res.text()).slice(0, 300)}`);
+    await readStream(res, sseLines(d => {
+      if (d === "[DONE]") return;
+      const t = JSON.parse(d).choices?.[0]?.delta?.content;
+      if (t) emit(t);
+    }));
+  }
+
+  async function ask(q) {
+    const sel = String(window.getSelection() || "").trim();
+    bubble("user", q + (candle ? `\n（附：${candle.date} 这根 K 线）` : "") + (sel ? "\n（附：选中的文字）" : ""));
+    const out = bubble("bot", "思考中…");
+    const req = context(q, sel);
+    let text = "";
+    const emit = t => {
+      text += t; out.innerHTML = md(text);
+      const log = document.getElementById("chat-log"); log.scrollTop = log.scrollHeight;
+    };
+    try {
+      if (LOCAL) await askLocal(req, emit);
+      else if (cfg.provider === "anthropic") await askAnthropic(req, emit);
+      else await askOpenAI(req, emit);
+      if (!text) emit("（没有收到回答）");
+    } catch (e) {
+      text = LOCAL
+        ? "⚠️ 连不上本机问答服务（" + e.message + "）。在终端运行：launchctl kickstart -k gui/$(id -u)/com.yuhankong.candlestick-chat"
+        : "⚠️ 请求失败：" + e.message + "\n请检查 ⚙️ 设置里的密钥和模型。若是「OpenAI 兼容接口」，该服务商需要允许浏览器直接调用（CORS）。";
+      out.innerHTML = md(text);
+    }
+    history.push({ role: "user", text: q }, { role: "bot", text });
+    history = history.slice(-20);
+    localStorage.setItem(KEY, JSON.stringify(history));
+    candle = null;
+    document.getElementById("chat-candle").hidden = true;
+  }
+
+  function showSettings(show) {
+    const s = document.getElementById("chat-settings");
+    s.hidden = !show;
+    if (!show) return;
+    s.querySelector("[name=provider]").value = cfg.provider;
+    s.querySelector("[name=key]").value = cfg.key;
+    s.querySelector("[name=baseUrl]").value = cfg.baseUrl;
+    renderModels();
+  }
+
+  function renderModels() {
+    const s = document.getElementById("chat-settings");
+    const p = s.querySelector("[name=provider]").value;
+    const list = PROVIDERS[p].models;
+    s.querySelector(".base-row").hidden = p !== "openai";
+    s.querySelector("[name=key]").placeholder = PROVIDERS[p].keyHint;
+    const m = s.querySelector("[name=model]");
+    m.setAttribute("list", list.length ? "chat-models" : "");
+    document.getElementById("chat-models").innerHTML = list.map(x => `<option value="${x}">`).join("");
+    if (p !== cfg.provider) m.value = list[0] || "";
+    else m.value = cfg.model;
+    m.placeholder = list.length ? "" : "例如 gpt-4o-mini、openrouter 上的模型名";
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const wrap = document.createElement("div");
+    wrap.innerHTML = `
+      <button id="chat-btn">💬 问这一页</button>
+      <div id="chat-panel" hidden>
+        <div class="chat-head"><b>问这一页</b><span class="muted">基于本页内容和 MSFT 数据回答</span>
+          ${LOCAL ? "" : '<button id="chat-gear" title="模型与密钥">⚙️</button>'}
+          <button id="chat-clear" title="清空对话">清空</button><button id="chat-x">✕</button></div>
+        <form id="chat-settings" hidden>
+          <p class="muted">使用<b>你自己的</b> API 密钥。密钥只保存在你这台设备的浏览器里，提问时由浏览器直接发给你选的服务商，不经过本站；费用记在你自己的账户上。</p>
+          <label>服务商 <select name="provider">${Object.entries(PROVIDERS).map(([k, v]) => `<option value="${k}">${v.name}</option>`).join("")}</select></label>
+          <label class="base-row">接口地址 <input name="baseUrl"></label>
+          <label>模型 <input name="model"><datalist id="chat-models"></datalist></label>
+          <label>API 密钥 <input name="key" type="password" autocomplete="off"></label>
+          <div class="row"><button type="submit">保存</button><button type="button" id="chat-forget">删除已保存的密钥</button></div>
+        </form>
+        <div id="chat-log"></div>
+        <div id="chat-candle" class="chip" hidden><span></span><button title="取消">✕</button></div>
+        <form id="chat-form"><textarea id="chat-q" rows="2" placeholder="例如：为什么这一天比前一天涨了还是阴烛？（回车发送，Shift+回车换行）"></textarea><button>发送</button></form>
+        <div class="chat-foot muted">小技巧：点图上任意一根 K 线可以附上它；先选中一段文字再提问也会附上。回答仅供学习，不构成投资建议。</div>
+      </div>`;
+    document.body.appendChild(wrap);
+
+    document.getElementById("chat-btn").onclick = () => open(document.getElementById("chat-panel").hidden);
+    document.getElementById("chat-x").onclick = () => open(false);
+    document.getElementById("chat-clear").onclick = () => {
+      history = []; localStorage.removeItem(KEY); document.getElementById("chat-log").innerHTML = "";
+    };
+    document.querySelector("#chat-candle button").onclick = () => { candle = null; document.getElementById("chat-candle").hidden = true; };
+    if (!LOCAL) {
+      const s = document.getElementById("chat-settings");
+      document.getElementById("chat-gear").onclick = () => showSettings(s.hidden);
+      s.querySelector("[name=provider]").onchange = renderModels;
+      s.onsubmit = e => {
+        e.preventDefault();
+        cfg = { provider: s.provider.value, model: s.model.value.trim(), key: s.key.value.trim(), baseUrl: s.baseUrl.value.trim() };
+        localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
+        showSettings(false);
+        document.getElementById("chat-q").focus();
+      };
+      document.getElementById("chat-forget").onclick = () => {
+        cfg.key = ""; localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); s.key.value = "";
+      };
+    }
+    history.forEach(h => bubble(h.role, h.text));
+    const qEl = document.getElementById("chat-q");
+    qEl.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); document.getElementById("chat-form").requestSubmit(); } });
+    document.getElementById("chat-form").onsubmit = e => {
+      e.preventDefault();
+      const q = qEl.value.trim();
+      if (!q) return;
+      if (!LOCAL && !cfg.key) { showSettings(true); return; }
+      qEl.value = "";
+      ask(q);
+    };
+  });
+})();
+
+// 各章共用：股票/日期选择器、行情加载、URL 参数、数据说明条。
+// 章节调用 initPage({ minIndex, render(d, i) })；d = {s, name, zh, as_of, rows}，i = 所选交易日在 rows 里的下标。
+// 数据来自公开站点 market/*.json（GitHub Actions 每个交易日收盘后更新）；URL 参数 ?t=MSFT&d=2026-11-04 可分享。
+
+(function (root) {
+  const PUBLIC = "https://yuhan-kong.github.io/candlestick-study/market/";
+  const BASE = location.hostname.endsWith("github.io") ? "../market/" : PUBLIC;
+  const cache = {};
+  const $ = id => document.getElementById(id);
+  const toRows = raw => raw.map(r => ({ date: r[0], o: r[1], h: r[2], l: r[3], c: r[4], v: r[5] }));
+
+  async function load(sym) {
+    if (!cache[sym]) {
+      const res = await fetch(BASE + encodeURIComponent(sym) + ".json");
+      if (!res.ok) throw new Error(`${sym} 数据加载失败（HTTP ${res.status}）`);
+      const d = await res.json();
+      cache[sym] = { ...d, rows: toRows(d.rows) };
+    }
+    return cache[sym];
+  }
+
+  // 把 {key: 值} 填进 [data-v]（纯文本）和 [data-h]（HTML）
+  function fill(textMap, htmlMap) {
+    document.querySelectorAll("[data-v]").forEach(el => { const k = el.dataset.v; if (k in textMap) el.textContent = textMap[k]; });
+    document.querySelectorAll("[data-h]").forEach(el => { const k = el.dataset.h; if (htmlMap && k in htmlMap) el.innerHTML = htmlMap[k]; });
+  }
+
+  function initPage({ minIndex, render }) {
+    let cur = null, index = [];
+
+    async function show(sym, date) {
+      $("data-note").textContent = "正在加载数据…";
+      try {
+        const d = await load(sym), rows = d.rows;
+        const pd = $("pick-date");
+        pd.min = rows[minIndex].date; pd.max = rows[rows.length - 1].date;
+        let i = rows.length - 1;
+        if (date) while (i > minIndex && rows[i].date > date) i--;   // 非交易日 → 之前最近的交易日
+        pd.value = rows[i].date;
+        $("pick-sym").value = sym;
+        cur = { sym, date: rows[i].date };
+        history.replaceState(null, "", location.pathname + "?" + new URLSearchParams({ t: sym, d: rows[i].date }));
+        const label = `${d.zh}（${d.s}）`;
+        render(d, i, label);
+        const latest = rows[rows.length - 1].date;
+        $("data-note").innerHTML = `数据：<b>${label} ${rows[i].date}（美东）收盘</b>` +
+          (rows[i].date === latest ? "，这是目前最新的交易日。" : `；最新交易日是 ${latest}，你正在「回到过去」看图。`) +
+          " 来源 Yahoo Finance，每个交易日收盘后自动更新；未收盘时只用到前一交易日。";
+      } catch (e) {
+        console.error(e);
+        $("data-note").textContent = "⚠️ " + e.message + "。如果你是直接双击打开的本地文件，需要联网才能加载行情数据。";
+      }
+    }
+    root.csShow = (sym, date) => show(sym || cur.sym, date);   // 页面内「跳到这一天」链接用
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        index = await (await fetch(BASE + "index.json")).json();
+      } catch (e) {
+        $("data-note").textContent = "⚠️ 股票清单加载失败，请检查网络后刷新。"; return;
+      }
+      $("pick-sym").innerHTML = index.map(x => `<option value="${x.s}">${x.zh}（${x.s}）</option>`).join("");
+      const p = new URLSearchParams(location.search);
+      const sym = index.some(x => x.s === p.get("t")) ? p.get("t") : "MSFT";
+      $("pick-sym").onchange = e => show(e.target.value, cur && cur.date);
+      $("pick-date").onchange = e => e.target.value && show(cur.sym, e.target.value);
+      $("pick-latest").onclick = () => show(cur.sym, null);
+      show(sym, p.get("d"));
+    });
+  }
+
+  root.PAGE = { initPage, fill, toRows };
+})(this);
+
+// 第 2 章页面：用 CH2 给所选日和最近 60 根蜡烛分类，填充图鉴、分布表、逐根解读和练习题。
+
+(function () {
+  const $ = id => document.getElementById(id);
+  const f2 = n => n.toFixed(2), sg = (n, d = 1) => (n >= 0 ? "+" : "") + n.toFixed(d);
+  let last = null;   // 最近一次渲染的结果，配色切换时重画迷你蜡烛
+
+  function quizHTML(V, label) {
+    const qs = [];
+    // 用真实蜡烛出「这是什么类型」的题：从近一年的例子里挑 4 种不同类型
+    const pool = ["longbody", "doji", "spinning", "uppershadow", "lowershadow", "marubozu", "gravestone", "dragonfly", "shortbody"]
+      .filter(t => V.examples[t]).slice(0, 4);
+    const names = { longbody: "长实体", doji: "十字星", spinning: "纺锤线", uppershadow: "长上影线", lowershadow: "长下影线",
+                    marubozu: "光头光脚", gravestone: "墓碑十字", dragonfly: "蜻蜓十字", shortbody: "短实体" };
+    pool.forEach((t, n) => {
+      const c = V.examples[t];
+      // 干扰项：优先用同一组里的其他类型，不够再补
+      const others = [...pool, "spinning", "longbody", "doji", "shortbody"].filter((x, j, a) => x !== t && a.indexOf(x) === j).slice(0, 2);
+      const opts = [[names[t], 1], ...others.map(x => [names[x], 0])];
+      opts.sort((a, b) => (a[0] + c.date).localeCompare(b[0] + c.date));   // 打乱，但同一天每次顺序一致
+      qs.push({ q: `${label} ${c.date} 这一根（开 ${f2(c.r.o)} 高 ${f2(c.r.h)} 低 ${f2(c.r.l)} 收 ${f2(c.r.c)}）属于哪一类？<span data-mini="${c.k}"></span>`,
+        opts, exp: `${CH2.TYPES[t].meaning}<br>判断依据：实体 ${f2(c.B)}（平均 ${f2(c.avgB)} 的 ${c.bodyX.toFixed(1)} 倍），上影 ${f2(c.U)}，下影 ${f2(c.Lw)}，振幅 ${f2(c.R)}。` });
+    });
+    qs.push({ q: "读一根蜡烛，本章建议的顺序是？",
+      opts: [["颜色 → 实体长短 → 影线", 1], ["影线 → 颜色 → 成交量", 0], ["只看收盘价", 0]],
+      exp: "颜色告诉你谁赢了，实体长短告诉你赢得多不多，影线告诉你盘中哪些价格被拒绝了。" });
+    qs.push({ q: "两只股票当天的实体都是 5 美元。一只股价 50 美元、平时实体约 1 美元；另一只股价 500 美元、平时实体约 8 美元。哪只算「长实体」？",
+      opts: [["股价 50 美元那只", 1], ["股价 500 美元那只", 0], ["两只都是", 0]],
+      exp: "实体长短要和这只股票自己最近的平均水平比：5 美元是前者平时的 5 倍，却只有后者平时的六成左右。" });
+    qs.push({ q: "一根很长的<b>上影线</b>最直接说明了什么？",
+      opts: [["盘中更高的价格没有守住，上方有卖压", 1], ["第二天一定下跌", 0], ["买方完全控制了这一天", 0]],
+      exp: "影线是盘中去过但没守住的价格。长上影 = 冲高被打回。它是一个提示，不是必然下跌的信号，要看位置和后续确认（第 3 章）。" });
+    qs.push({ q: "十字星出现在哪种情况下<b>更值得留意</b>？",
+      opts: [["一段明显的上涨或下跌之后", 1], ["长时间横盘的中间", 0], ["任何位置意义都一样", 0]],
+      exp: "十字星代表多空平衡。持续趋势之后出现，说明原来占优的一方可能在减弱；横盘中间出现则很常见，意义不大。" });
+    return qs.map((x, n) => `<div class="q"><b>${n + 1}.</b> ${x.q}<div class="opts">` +
+      x.opts.map(o => `<button class="opt" data-ok="${o[1]}">${o[0]}</button>`).join("") +
+      `</div><div class="exp">${x.exp}</div></div>`).join("");
+  }
+
+  function drawMinis() {
+    if (!last) return;
+    const { d, V } = last;
+    document.querySelectorAll("[data-mini]").forEach(el => { el.innerHTML = miniCandle(d.rows[+el.dataset.mini]); });
+    PAGE.fill({}, { miniBar: miniBar(V.last, 60, 110), miniCandle: miniCandle(V.last, 60, 110) });
+  }
+
+  function render(d, i, label) {
+    const V = CH2.computeCh2(d.rows, i), c = V.cur, T = V.text;
+    last = { d, V };
+    window.D = { year: V.year, sixty: V.sixty };
+    PAGE.fill({ label, date: c.date, o: f2(c.r.o), h: f2(c.r.h), l: f2(c.r.l), c: f2(c.r.c),
+      B: f2(c.B), avgB: f2(c.avgB), bodyX: c.bodyX.toFixed(1) + " 倍", R: f2(c.R) },
+      { body: T.body, shadow: T.shadow, verdict: T.verdict });
+
+    $("gallery").innerHTML = CH2.ORDER.map(t => {
+      const ex = V.examples[t], T0 = CH2.TYPES[t];
+      if (!ex) return `<div class="g none"><div class="pic">—</div><b class="t">${T0.name}</b><div>${T0.meaning}</div><div class="rule">${label} 近一年没有出现</div></div>`;
+      return `<div class="g"><div class="pic"><span data-mini="${ex.k}"></span><small>${ex.date.slice(5)}</small></div>` +
+        `<b class="t">${T0.name}</b><div>${T0.meaning}</div>` +
+        `<div class="rule">例：${ex.date}（${ex.name}，${ex.where}）· 近 60 天 ${V.count60[t] || 0} 次 · <a onclick="csShow(null,'${ex.date}')">看这一天</a></div></div>`;
+    }).join("");
+
+    const dist = Object.entries(V.count60).sort((a, b) => b[1] - a[1]);
+    $("dist-rows").innerHTML = dist.map(([t, n]) => `<tr><td>${CH2.TYPES[t].name}</td><td class="num">${n}</td><td class="num">${(n / 60 * 100).toFixed(0)}%</td></tr>`).join("");
+    const strong = (V.count60.longbody || 0) + (V.count60.marubozu || 0);
+    const hesitant = ["doji", "longleg", "gravestone", "dragonfly", "spinning", "highwave", "shortbody"].reduce((s, t) => s + (V.count60[t] || 0), 0);
+    PAGE.fill({}, { distNote: `近 60 天里，表示「一方明显占优」的长实体和光头光脚共 <b>${strong}</b> 根，表示「犹豫、力量接近」的十字星、纺锤线、高浪线、短实体共 <b>${hesitant}</b> 根。` +
+      (strong > hesitant ? "这段时间方向感比较强。" : hesitant > strong * 1.5 ? "这段时间犹豫的时候更多，方向不明确。" : "两类差不多，强弱交替。") +
+      " 这只是统计，不是信号：第 3 章会讲哪些组合真正值得留意。" });
+
+    $("recent-rows").innerHTML = V.recent10.map(x => `<tr><td>${x.date}</td><td><span data-mini="${x.k}"></span></td><td>${x.name}</td><td>${x.where.replace("出现在", "")}</td>` +
+      `<td class="num">${sg((x.r.c / d.rows[x.k - 1].c - 1) * 100)}%</td></tr>`).join("");
+
+    const labels = {};
+    V.cls60.forEach(x => { if (CH2.TYPES[x.type].code) labels[x.date] = CH2.TYPES[x.type].code; });
+    priceChart("c-sixty", { type: "candle", rows: V.sixty, volume: true, height: 440, labels, marks: { [c.date]: "今" } });
+
+    $("quiz").innerHTML = quizHTML(V, label);
+    quiz();
+    drawMinis();
+  }
+
+  charts.set("ch2-minis", { draw: drawMinis });   // 切换配色时一起重画
+  PAGE.initPage({ minIndex: CH2.MIN_INDEX, render });
+})();
+
+</script>
+</body>
+</html>

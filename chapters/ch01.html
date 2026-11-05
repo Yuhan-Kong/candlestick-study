@@ -85,6 +85,21 @@ nav.top { font-size: 14px; margin-bottom: 14px; } nav.top a { color: var(--muted
 .picker select, .picker input { font: inherit; font-size: 15px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px; color: var(--fg); background: #fff; }
 .picker button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 14px; }
 .picker .data-note { flex-basis: 100%; }
+.clabel { font-size: 10px; fill: #c2410c; text-anchor: middle; font-weight: 600; }
+.book.general::before { content: "📘 通用讲法（书中细节以原书为准）"; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 10px; margin: 12px 0; }
+.gallery .g { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; grid-template-columns: 52px 1fr; gap: 4px 10px; font-size: 14px; line-height: 1.6; }
+.gallery .g .pic { grid-row: span 3; text-align: center; }
+.gallery .g .pic small { display: block; color: var(--muted); font-size: 11px; }
+.gallery .g b.t { font-size: 15px; }
+.gallery .g .rule { color: var(--muted); font-size: 12.5px; }
+.gallery .g a { color: #1d4ed8; cursor: pointer; font-size: 12.5px; }
+.gallery .g.none { opacity: .55; }
+.pair { display: flex; gap: 28px; align-items: flex-end; justify-content: center; padding: 8px; }
+.pair div { text-align: center; font-size: 13px; color: var(--muted); }
+.q .mini { display: block; margin: 8px 0; }
+#recent-rows .mini { width: 26px; height: 44px; }
+#recent-rows td { vertical-align: middle; padding-top: 3px; padding-bottom: 3px; }
 </style>
 </head>
 <body>
@@ -355,6 +370,9 @@ function priceChart(container, opts) {
         el("rect", { x: x(i) - bw / 2, y: H - 22 - vh, width: bw, height: vh,
                      fill: opts.type === "line" ? "#9aa4b2" : (up ? S.upStroke : S.downStroke), opacity: 0.45 }, g);
       }
+      if (opts.labels && opts.labels[r.date]) {   // 每根蜡烛下方的小标签（如第 2 章的类型代号）
+        el("text", { x: x(i), y: Math.min(y(r.l) + 13, padT + priceH + 10), class: "clabel" }, svg).textContent = opts.labels[r.date];
+      }
       if (opts.marks && opts.marks[r.date]) {
         el("circle", { cx: x(i), cy: y(r.h) - 12, r: 9, class: "mark" }, svg);
         el("text", { x: x(i), y: y(r.h) - 8, class: "markt" }, svg).textContent = opts.marks[r.date];
@@ -419,6 +437,21 @@ function pnfChart(container, cols, boxSize) {
     });
     hit.addEventListener("mouseleave", () => tooltip(box).style.display = "none");
   });
+}
+
+// 迷你蜡烛 / 条形（返回 SVG 字符串，用于图鉴卡片和练习题；按自身最高最低缩放）
+function miniCandle(r, w = 44, h = 74) {
+  const S = SCHEMES[scheme], up = r.c >= r.o, pad = 4, R = (r.h - r.l) || 1;
+  const y = p => pad + (r.h - p) / R * (h - 2 * pad), cx = w / 2;
+  const top = y(Math.max(r.o, r.c)), bot = y(Math.min(r.o, r.c));
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" class="mini"><line x1="${cx}" x2="${cx}" y1="${y(r.h)}" y2="${y(r.l)}" stroke="${up ? S.upStroke : S.downStroke}" stroke-width="1.5"/>` +
+    `<rect x="${cx - w * 0.22}" y="${top}" width="${w * 0.44}" height="${Math.max(1.5, bot - top)}" fill="${up ? S.up : S.down}" stroke="${up ? S.upStroke : S.downStroke}" stroke-width="1.5"/></svg>`;
+}
+function miniBar(r, w = 44, h = 74) {
+  const S = SCHEMES[scheme], up = r.c >= r.o, pad = 4, R = (r.h - r.l) || 1, c = up ? S.upStroke : S.downStroke;
+  const y = p => pad + (r.h - p) / R * (h - 2 * pad), cx = w / 2;
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" class="mini"><g stroke="${c}" stroke-width="1.8"><line x1="${cx}" x2="${cx}" y1="${y(r.h)}" y2="${y(r.l)}"/>` +
+    `<line x1="${cx - 10}" x2="${cx}" y1="${y(r.o)}" y2="${y(r.o)}"/><line x1="${cx}" x2="${cx + 10}" y1="${y(r.c)}" y2="${y(r.c)}"/></g></svg>`;
 }
 
 // 单根蜡烛解剖图
@@ -954,34 +987,86 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 })();
 
-// 第 1 章页面：选股票、选日期 → 用 CH1.computeCh1 重算 → 填充文字、表格、图表、练习题。
-// 数据来自公开站点的 market/*.json（GitHub Actions 每个交易日收盘后更新）；URL 参数 ?t=MSFT&d=2026-11-04 可分享。
+// 各章共用：股票/日期选择器、行情加载、URL 参数、数据说明条。
+// 章节调用 initPage({ minIndex, render(d, i) })；d = {s, name, zh, as_of, rows}，i = 所选交易日在 rows 里的下标。
+// 数据来自公开站点 market/*.json（GitHub Actions 每个交易日收盘后更新）；URL 参数 ?t=MSFT&d=2026-11-04 可分享。
 
-(function () {
+(function (root) {
   const PUBLIC = "https://yuhan-kong.github.io/candlestick-study/market/";
   const BASE = location.hostname.endsWith("github.io") ? "../market/" : PUBLIC;
   const cache = {};
-  let index = [], cur = null;
   const $ = id => document.getElementById(id);
-  const f2 = n => n.toFixed(2), sg = (n, d = 2) => (n >= 0 ? "+" : "") + n.toFixed(d);
-  const fmtVol = v => (v / 1e6).toFixed(1) + "M";
+  const toRows = raw => raw.map(r => ({ date: r[0], o: r[1], h: r[2], l: r[3], c: r[4], v: r[5] }));
 
   async function load(sym) {
     if (!cache[sym]) {
       const res = await fetch(BASE + encodeURIComponent(sym) + ".json");
       if (!res.ok) throw new Error(`${sym} 数据加载失败（HTTP ${res.status}）`);
       const d = await res.json();
-      cache[sym] = { ...d, rows: CH1.toRows(d.rows) };
+      cache[sym] = { ...d, rows: toRows(d.rows) };
     }
     return cache[sym];
   }
 
-  function setText(attr, map) {
-    document.querySelectorAll(`[${attr}]`).forEach(el => {
-      const k = el.getAttribute(attr);
-      if (k in map) el[attr === "data-v" ? "textContent" : "innerHTML"] = map[k];
+  // 把 {key: 值} 填进 [data-v]（纯文本）和 [data-h]（HTML）
+  function fill(textMap, htmlMap) {
+    document.querySelectorAll("[data-v]").forEach(el => { const k = el.dataset.v; if (k in textMap) el.textContent = textMap[k]; });
+    document.querySelectorAll("[data-h]").forEach(el => { const k = el.dataset.h; if (htmlMap && k in htmlMap) el.innerHTML = htmlMap[k]; });
+  }
+
+  function initPage({ minIndex, render }) {
+    let cur = null, index = [];
+
+    async function show(sym, date) {
+      $("data-note").textContent = "正在加载数据…";
+      try {
+        const d = await load(sym), rows = d.rows;
+        const pd = $("pick-date");
+        pd.min = rows[minIndex].date; pd.max = rows[rows.length - 1].date;
+        let i = rows.length - 1;
+        if (date) while (i > minIndex && rows[i].date > date) i--;   // 非交易日 → 之前最近的交易日
+        pd.value = rows[i].date;
+        $("pick-sym").value = sym;
+        cur = { sym, date: rows[i].date };
+        history.replaceState(null, "", location.pathname + "?" + new URLSearchParams({ t: sym, d: rows[i].date }));
+        const label = `${d.zh}（${d.s}）`;
+        render(d, i, label);
+        const latest = rows[rows.length - 1].date;
+        $("data-note").innerHTML = `数据：<b>${label} ${rows[i].date}（美东）收盘</b>` +
+          (rows[i].date === latest ? "，这是目前最新的交易日。" : `；最新交易日是 ${latest}，你正在「回到过去」看图。`) +
+          " 来源 Yahoo Finance，每个交易日收盘后自动更新；未收盘时只用到前一交易日。";
+      } catch (e) {
+        console.error(e);
+        $("data-note").textContent = "⚠️ " + e.message + "。如果你是直接双击打开的本地文件，需要联网才能加载行情数据。";
+      }
+    }
+    root.csShow = (sym, date) => show(sym || cur.sym, date);   // 页面内「跳到这一天」链接用
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        index = await (await fetch(BASE + "index.json")).json();
+      } catch (e) {
+        $("data-note").textContent = "⚠️ 股票清单加载失败，请检查网络后刷新。"; return;
+      }
+      $("pick-sym").innerHTML = index.map(x => `<option value="${x.s}">${x.zh}（${x.s}）</option>`).join("");
+      const p = new URLSearchParams(location.search);
+      const sym = index.some(x => x.s === p.get("t")) ? p.get("t") : "MSFT";
+      $("pick-sym").onchange = e => show(e.target.value, cur && cur.date);
+      $("pick-date").onchange = e => e.target.value && show(cur.sym, e.target.value);
+      $("pick-latest").onclick = () => show(cur.sym, null);
+      show(sym, p.get("d"));
     });
   }
+
+  root.PAGE = { initPage, fill, toRows };
+})(this);
+
+// 第 1 章页面：选股票、选日期（page_common.js）→ 用 CH1.computeCh1 重算 → 填充文字、表格、图表、练习题。
+
+(function () {
+  const $ = id => document.getElementById(id);
+  const f2 = n => n.toFixed(2), sg = (n, d = 2) => (n >= 0 ? "+" : "") + n.toFixed(d);
+  const fmtVol = v => (v / 1e6).toFixed(1) + "M";
 
   function quizHTML(V, label) {
     const ex = V.blackUp || V.whiteDown, isBlack = !!V.blackUp;
@@ -1024,11 +1109,10 @@ document.addEventListener("DOMContentLoaded", () => {
       `</div><div class="exp">${x.exp}</div></div>`).join("");
   }
 
-  function render(d, i) {
+  function render(d, i, label) {
     const V = CH1.computeCh1(d.rows, i), L = V.last, T = V.text;
-    const label = `${d.zh}（${d.s}）`;
     window.D = { year: V.year, sixty: V.sixty };       // 给「问这一页」用
-    setText("data-v", {
+    PAGE.fill({
       label, date: L.date, o: f2(L.o), h: f2(L.h), l: f2(L.l), c: f2(L.c), hiNote: T.hiNote,
       vol: fmtVol(L.v), v50: fmtVol(V.v50), vratio: V.vratio.toFixed(1) + " 倍", dayChg: sg(V.dayChg, 1) + "%",
       sixStart: V.six[0].date, box: String(V.box), pnfCols: String(V.pnf.length),
@@ -1038,7 +1122,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const ex = [];
     if (V.blackUp) ex.push(`<li><b>${V.blackUp.date}</b>：开盘 ${f2(V.blackUp.o)}，收盘 ${f2(V.blackUp.c)}，比前一天收盘 ${f2(V.blackUp.pc)} 还<b>高</b>，但收盘低于开盘，所以是<b>阴烛</b>。</li>`);
     if (V.whiteDown) ex.push(`<li><b>${V.whiteDown.date}</b>：开盘 ${f2(V.whiteDown.o)}，收盘 ${f2(V.whiteDown.c)}，比前一天收盘 ${f2(V.whiteDown.pc)} <b>低</b>，但收盘高于开盘，所以是<b>阳烛</b>。</li>`);
-    setText("data-h", { anatomy: T.anatomy, examples: ex.join(""), p1: T.p1, p2: T.p2, p3: T.p3, p4: T.p4, p5: T.p5,
+    PAGE.fill({}, { anatomy: T.anatomy, examples: ex.join(""), p1: T.p1, p2: T.p2, p3: T.p3, p4: T.p4, p5: T.p5,
       vol: T.vol, tally: T.tally, steps: T.steps.map(s => `<li>${s}</li>`).join(""), conclusion: T.conclusion });
 
     $("month-rows").innerHTML = V.months.map((m, j) => {
@@ -1062,48 +1146,9 @@ document.addEventListener("DOMContentLoaded", () => {
     $("quiz").innerHTML = quizHTML(V, label);
     quiz();
 
-    const latest = d.rows[d.rows.length - 1].date;
-    $("data-note").innerHTML = `数据：<b>${label} ${L.date}（美东）收盘</b>` +
-      (L.date === latest ? "，这是目前最新的交易日。" : `；最新交易日是 ${latest}，你正在「回到过去」看图。`) +
-      ` 来源 Yahoo Finance，每个交易日收盘后自动更新；未收盘时只用到前一交易日。`;
   }
 
-  async function show(sym, date) {
-    $("data-note").textContent = "正在加载数据…";
-    try {
-      const d = await load(sym);
-      const rows = d.rows, min = rows[CH1.MIN_INDEX].date, max = rows[rows.length - 1].date;
-      const pd = $("pick-date");
-      pd.min = min; pd.max = max;
-      let i = rows.length - 1;
-      if (date) {                                        // 选了非交易日 → 取那天之前最近的交易日
-        while (i > CH1.MIN_INDEX && rows[i].date > date) i--;
-      }
-      pd.value = rows[i].date;
-      $("pick-sym").value = sym;
-      cur = { sym, date: rows[i].date };
-      const q = new URLSearchParams({ t: sym, d: rows[i].date });
-      history.replaceState(null, "", location.pathname + "?" + q);
-      render(d, i);
-    } catch (e) {
-      $("data-note").textContent = "⚠️ " + e.message + "。如果你是直接双击打开的本地文件，需要联网才能加载行情数据。";
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", async () => {
-    try {
-      index = await (await fetch(BASE + "index.json")).json();
-    } catch (e) {
-      $("data-note").textContent = "⚠️ 股票清单加载失败，请检查网络后刷新。"; return;
-    }
-    $("pick-sym").innerHTML = index.map(x => `<option value="${x.s}">${x.zh}（${x.s}）</option>`).join("");
-    const p = new URLSearchParams(location.search);
-    const sym = index.some(x => x.s === p.get("t")) ? p.get("t") : "MSFT";
-    $("pick-sym").onchange = e => show(e.target.value, cur && cur.date);
-    $("pick-date").onchange = e => e.target.value && show(cur.sym, e.target.value);
-    $("pick-latest").onclick = () => show(cur.sym, null);
-    show(sym, p.get("d"));
-  });
+  PAGE.initPage({ minIndex: CH1.MIN_INDEX, render });
 })();
 
 </script>
