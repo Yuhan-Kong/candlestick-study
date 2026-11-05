@@ -1,0 +1,79 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>蜡烛图学习计划</title><style>:root { --fg:#1f2328; --muted:#656d76; --line:#d0d7de; --bg:#fbfaf7; --card:#fff; --accent:#c2410c; --ok:#1a7f37; --bad:#cf222e; }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.75 -apple-system,"PingFang SC","Hiragino Sans GB",sans-serif; }
+main { max-width: 960px; margin: 0 auto; padding: 28px 22px 80px; }
+h1 { font-size: 30px; margin: 0 0 4px; }
+h2 { font-size: 22px; margin: 44px 0 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+h3 { font-size: 18px; margin: 26px 0 6px; }
+.sub { color: var(--muted); margin: 0 0 18px; }
+.page { color: var(--muted); font-size: 13px; font-weight: normal; margin-left: 6px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; margin: 14px 0; }
+.data-note { background:#fff7ed; border:1px solid #fed7aa; border-radius:10px; padding:10px 14px; font-size:14px; }
+.tip-box { border-left: 4px solid var(--accent); background:#fff; padding: 10px 14px; margin: 14px 0; border-radius: 0 8px 8px 0; }
+.book { border-left: 4px solid #8b949e; background:#f6f8fa; padding: 10px 14px; margin: 14px 0; border-radius: 0 8px 8px 0; font-size: 15px; }
+.book::before { content: "📖 书中要点（转述）"; display:block; font-weight:600; font-size:13px; color:var(--muted); }
+.practice { border: 2px solid #2563eb22; background: #f5f8ff; border-radius: 12px; padding: 14px 18px; margin: 16px 0; }
+.practice > h4 { margin: 0 0 6px; color:#1d4ed8; }
+.chart-box { position: relative; background:#fff; border:1px solid var(--line); border-radius:10px; padding:6px; margin: 10px 0; }
+svg.chart { width: 100%; height: auto; display: block; }
+svg.chart.small { max-width: 420px; }
+.grid { stroke: #eaeef2; stroke-width: 1; } .grid.faint { stroke:#f3f4f6; }
+.axis { font-size: 11px; fill: #8b949e; }
+.lbl { font-size: 14px; fill: var(--fg); } .lbl.muted { fill: var(--muted); }
+.mark { fill: #c2410c; } .markt { font-size: 11px; fill: #fff; text-anchor: middle; font-weight: 700; }
+.tip { position:absolute; display:none; pointer-events:none; background:#1f2328ee; color:#fff; font-size:12.5px; line-height:1.5; padding:8px 10px; border-radius:8px; z-index:5; width:180px; }
+.tip .u { color:#7ee2a8; } .tip .d { color:#ffa198; } .tip .muted { color:#c9d1d9; }
+.scheme { display:flex; gap:8px; flex-wrap:wrap; align-items:center; font-size:14px; margin: 8px 0 0; }
+.scheme button, .tabs button { border:1px solid var(--line); background:#fff; border-radius:999px; padding:4px 12px; cursor:pointer; font-size:13.5px; }
+.scheme button.on, .tabs button.on { background:var(--fg); color:#fff; border-color:var(--fg); }
+.tabs { display:flex; gap:8px; flex-wrap:wrap; margin: 10px 0 4px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; margin: 8px 0; }
+th, td { border: 1px solid var(--line); padding: 6px 9px; text-align: left; vertical-align: top; }
+th { background: #f6f8fa; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.kpi { display:grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin: 10px 0; }
+.kpi div { background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
+.kpi b { display:block; font-size: 20px; } .kpi span { font-size: 13px; color: var(--muted); }
+.q { background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:12px 0; }
+.q .opts { display:flex; flex-direction:column; gap:6px; margin-top:8px; }
+.q button.opt { text-align:left; border:1px solid var(--line); background:#fff; border-radius:8px; padding:7px 12px; cursor:pointer; font-size:15px; }
+.q button.opt:hover { background:#f6f8fa; }
+.q button.right { border-color: var(--ok); background:#dafbe1; } .q button.wrong { border-color: var(--bad); background:#ffebe9; }
+.q .exp { display:none; margin-top:10px; font-size:15px; background:#f6f8fa; border-radius:8px; padding:10px 12px; }
+#score { position: sticky; bottom: 12px; display:inline-block; background:var(--fg); color:#fff; padding:6px 14px; border-radius:999px; font-size:14px; }
+.terms { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+.terms div { background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:14.5px; }
+.terms b { display:block; }
+.toc { font-size: 14.5px; columns: 2; }
+.disclaimer { color: var(--muted); font-size: 13px; margin-top: 40px; }
+nav.top { font-size: 14px; margin-bottom: 14px; } nav.top a { color: var(--muted); }
+.muted { color: var(--muted); }
+#chat-btn { position: fixed; right: 22px; bottom: 22px; z-index: 20; background: var(--fg); color: #fff; border: 0; border-radius: 999px; padding: 11px 18px; font-size: 15px; cursor: pointer; box-shadow: 0 4px 14px #0003; }
+#chat-panel { position: fixed; right: 22px; bottom: 76px; z-index: 20; width: min(420px, calc(100vw - 30px)); height: min(600px, calc(100vh - 110px)); background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 10px 30px #0002; display: flex; flex-direction: column; }
+#chat-panel[hidden] { display: none; }
+.chat-head { display: flex; gap: 8px; align-items: baseline; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.chat-head .muted { flex: 1; font-size: 12px; }
+.chat-head button { border: 0; background: none; cursor: pointer; color: var(--muted); font-size: 13px; }
+#chat-log { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; font-size: 14.5px; line-height: 1.65; }
+.msg { max-width: 88%; padding: 8px 11px; border-radius: 12px; word-break: break-word; }
+.msg.user { align-self: flex-end; background: #1f2328; color: #fff; }
+.msg.bot { align-self: flex-start; background: #f3f4f6; }
+.msg code { background: #0000000f; padding: 0 4px; border-radius: 4px; }
+.chip { margin: 0 12px 6px; font-size: 12.5px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 999px; padding: 2px 6px 2px 10px; display: flex; justify-content: space-between; }
+.chip[hidden] { display: none; }
+.chip button { border: 0; background: none; cursor: pointer; }
+#chat-form { display: flex; gap: 8px; padding: 0 12px 6px; }
+#chat-form textarea { flex: 1; resize: none; border: 1px solid var(--line); border-radius: 10px; padding: 7px 9px; font: inherit; font-size: 14px; }
+#chat-form button { border: 0; background: var(--fg); color: #fff; border-radius: 10px; padding: 0 14px; cursor: pointer; }
+.chat-foot { font-size: 11.5px; padding: 0 12px 9px; }
+</style></head><body><main>
+<h1>📚 蜡烛图学习计划</h1>
+<p class="sub">《日本蜡烛图分析技术从入门到精通（All About Candlestick Charting）》Wayne A. Corbitt 著，梁岩、刘璐 译 · 节奏：每天 1 章；学有余力再加 · 所有实战以微软（MSFT）当天日线为例</p>
+<div class="card">学习目标：<b>在实战中看懂走势，知道每个走势对应哪个知识点。</b><br>
+每章页面 = 书中要点（标注页码）+ MSFT 真实数据实战 + 练习题。美股未收盘时自动使用前一交易日数据并在页面顶部注明。<br>
+进度：已完成 <b>1 / 11</b> 章</div>
+<table><tr><th>日期</th><th>章节</th><th>页码</th><th>重点</th><th>MSFT 实战</th><th>状态</th></tr><tr><th colspan="6">第一部分 蜡烛图的构成和形态</th></tr><tr><td>11/04<br><span class="muted">第 1 天</span></td><td><b>第 1 章</b><br><a href="chapters/ch01.html">蜡烛的启迪</a></td><td>p.3–16</td><td>蜡烛起源；阳烛/阴烛；技术分析五原则；供需与成交量；四种图表对比</td><td>拆解当日 MSFT 蜡烛；月度高低点看积累/分发；四种图同屏对比</td><td>已完成</td></tr><tr><td>11/05<br><span class="muted">第 2 天</span></td><td><b>第 2 章</b><br>蜡烛图的构成和分析</td><td>p.17–26</td><td>基本蜡烛线：长短实体、上下影线、十字星、纺锤线</td><td>把 MSFT 最近 60 根蜡烛逐一分类</td><td>未开始</td></tr><tr><td>11/06<br><span class="muted">第 3 天</span></td><td><b>第 3 章</b><br>蜡烛图的反转形态</td><td>p.27–69</td><td>锤子线、吞没、乌云盖顶、星线等反转形态（全书最长，43 页）<br><span class="muted">⚠️ 篇幅约为其他章 2–3 倍，可拆成两天</span></td><td>在 MSFT 一年数据里自动标出反转形态并复盘后续走势</td><td>未开始</td></tr><tr><td>11/07<br><span class="muted">第 4 天</span></td><td><b>第 4 章</b><br>蜡烛图的持续形态</td><td>p.70–96</td><td>三白兵、上升/下降三法、跳空持续等</td><td>找 MSFT 上涨途中的持续形态</td><td>未开始</td></tr><tr><th colspan="6">第二部分 蜡烛图形态与西方技术的结合</th></tr><tr><td>11/08<br><span class="muted">第 5 天</span></td><td><b>第 5 章</b><br>技术分析：趋势、支撑和阻力</td><td>p.99–122</td><td>趋势线、支撑与阻力、形态出现位置的重要性</td><td>画 MSFT 支撑/阻力，回看第 1 章的老高点</td><td>未开始</td></tr><tr><td>11/09<br><span class="muted">第 6 天</span></td><td><b>第 6 章</b><br>蜡烛图和动能指标</td><td>p.123–147</td><td>RSI、MACD、随机指标等与蜡烛形态配合</td><td>MSFT 叠加动能指标，看背离</td><td>未开始</td></tr><tr><td>11/10<br><span class="muted">第 7 天</span></td><td><b>第 7 章</b><br>蜡烛图和成交量</td><td>p.148–167</td><td>量价配合确认形态</td><td>MSFT 放量形态与缩量形态的后续对比</td><td>未开始</td></tr><tr><td>11/11<br><span class="muted">第 8 天</span></td><td><b>第 8 章</b><br>积累数据，整合片段</td><td>p.168–188</td><td>把形态、趋势、指标、成交量整合成完整判断</td><td>对当日 MSFT 做一份完整读图报告</td><td>未开始</td></tr><tr><th colspan="6">第三部分 蜡烛图的「伙伴」：其他图表分析方法</th></tr><tr><td>11/12<br><span class="muted">第 9 天</span></td><td><b>第 9 章</b><br>新三价线指标</td><td>p.191–209</td><td>新三价线（Three Line Break）的画法与信号</td><td>用 MSFT 画新三价线</td><td>未开始</td></tr><tr><td>11/13<br><span class="muted">第 10 天</span></td><td><b>第 10 章</b><br>砖形图</td><td>p.210–222</td><td>砖形图（Renko）的画法与信号</td><td>用 MSFT 画砖形图</td><td>未开始</td></tr><tr><td>11/14<br><span class="muted">第 11 天</span></td><td><b>第 11 章</b><br>折线图</td><td>p.223–</td><td>日本折线图（一般认为即 Kagi 图）的画法与信号</td><td>用 MSFT 画折线图，与蜡烛图对照</td><td>未开始</td></tr></table>
+<p class="muted" style="font-size:14px">日期按每天一章排；某天学不完就顺延，有余力可以提前学下一章。日期改动会同步到 Notion。</p>
+<p class="disclaimer">个人学习笔记，不构成投资建议。</p>
+</main></body></html>
