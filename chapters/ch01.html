@@ -1265,12 +1265,14 @@ document.addEventListener("DOMContentLoaded", () => {
   const $ = id => document.getElementById(id);
   const toRows = raw => raw.map(r => ({ date: r[0], o: r[1], h: r[2], l: r[3], c: r[4], v: r[5] }));
 
+  // 页面开着超过 5 分钟就重新取（收盘后数据会更新）；cache: "no-cache" = 每次都向服务器确认，没变时只回 304，不重新下载
+  const FRESH = 5 * 60e3;
   async function load(sym) {
-    if (!cache[sym]) {
-      const res = await fetch(BASE + encodeURIComponent(sym) + ".json");
+    if (!cache[sym] || Date.now() - cache[sym].at > FRESH) {
+      const res = await fetch(BASE + encodeURIComponent(sym) + ".json", { cache: "no-cache" });
       if (!res.ok) throw new Error(`${sym} 数据加载失败（HTTP ${res.status}）`);
       const d = await res.json();
-      cache[sym] = { ...d, rows: toRows(d.rows) };
+      cache[sym] = { ...d, rows: toRows(d.rows), at: Date.now() };
     }
     return cache[sym];
   }
@@ -1311,7 +1313,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.addEventListener("DOMContentLoaded", async () => {
       try {
-        index = await (await fetch(BASE + "index.json")).json();
+        index = await (await fetch(BASE + "index.json", { cache: "no-cache" })).json();
       } catch (e) {
         $("data-note").textContent = "⚠️ 股票清单加载失败，请检查网络后刷新。"; return;
       }
