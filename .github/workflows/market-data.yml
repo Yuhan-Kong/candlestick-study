@@ -1,23 +1,35 @@
-# 每个交易日美股收盘后更新 market/*.json（学习页在浏览器里用这些数据现场计算）
+# 每个交易日美股收盘后：下载最新行情 → 和页面一起直接部署到 GitHub Pages。
+# 行情不再提交进 git（否则每天一份、历史越积越大）；网站上的 market/*.json 每次部署都是最新的一份。
 name: market-data
 on:
   schedule:
     - cron: "30 21 * * 1-5"   # 美东 16:30（夏令时）/ 17:30（冬令时）之后
     - cron: "15 23 * * 1-5"   # 补跑一次，防止 Yahoo 数据延迟
+  push:
+    branches: [main]          # 发布新章节时也重新部署
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
 jobs:
-  update:
+  deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
       - run: python scripts/fetch_data.py --out .
-      - run: |
-          git config user.name "market-data-bot"
-          git config user.email "actions@users.noreply.github.com"
-          git add market
-          git diff --cached --quiet || (git commit -m "更新行情 $(date -u +%F)" && git push)
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
