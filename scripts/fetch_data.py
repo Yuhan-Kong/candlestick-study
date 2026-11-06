@@ -41,12 +41,20 @@ def fetch(sym):
         res = json.load(r)["chart"]["result"][0]
     q, meta = res["indicators"]["quote"][0], res["meta"]
     rows = []
+    period = meta["currentTradingPeriod"]["regular"]
+    closed_today = time.time() >= period["end"]
     for i, ts in enumerate(res["timestamp"]):
         o, h, l, c, v = (q[k][i] for k in ("open", "high", "low", "close", "volume"))
+        # Yahoo 有时收盘几个小时后当天日线仍缺收盘价：当天已收盘时，用行情摘要里的当日数据补齐
+        if i == len(res["timestamp"]) - 1 and closed_today and ts >= period["start"] - 3600 and None in (h, l, c):
+            h = h if h is not None else meta.get("regularMarketDayHigh")
+            l = l if l is not None else meta.get("regularMarketDayLow")
+            c = c if c is not None else meta.get("regularMarketPrice")
+            v = v if v is not None else meta.get("regularMarketVolume")
+            o = o if o is not None else c
         if None in (o, h, l, c):
             continue
         rows.append([datetime.fromtimestamp(ts, NY).strftime("%Y-%m-%d"), round(o, 2), round(h, 2), round(l, 2), round(c, 2), int(v or 0)])
-    period = meta["currentTradingPeriod"]["regular"]
     if rows and rows[-1][0] == datetime.now(NY).strftime("%Y-%m-%d") and period["start"] <= time.time() < period["end"]:
         rows.pop()
     return meta.get("longName") or meta.get("shortName") or sym, rows
