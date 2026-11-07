@@ -1,0 +1,190 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>蜡烛图学习计划</title><style>:root { --fg:#1f2328; --muted:#656d76; --line:#d0d7de; --bg:#fbfaf7; --card:#fff; --accent:#c2410c; --ok:#1a7f37; --bad:#cf222e; }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.75 -apple-system,"PingFang SC","Hiragino Sans GB",sans-serif; }
+main { max-width: 960px; margin: 0 auto; padding: 28px 22px 80px; }
+h1 { font-size: 30px; margin: 0 0 4px; }
+h2 { font-size: 22px; margin: 44px 0 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+h3 { font-size: 18px; margin: 26px 0 6px; }
+.sub { color: var(--muted); margin: 0 0 18px; }
+.page { color: var(--muted); font-size: 13px; font-weight: normal; margin-left: 6px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; margin: 14px 0; }
+.data-note { background:#fff7ed; border:1px solid #fed7aa; border-radius:10px; padding:10px 14px; font-size:14px; }
+.tip-box { border-left: 4px solid var(--accent); background:#fff; padding: 10px 14px; margin: 14px 0; border-radius: 0 8px 8px 0; }
+.book { border-left: 4px solid #8b949e; background:#f6f8fa; padding: 10px 14px; margin: 14px 0; border-radius: 0 8px 8px 0; font-size: 15px; }
+.book::before { content: "📖 书中要点（转述）"; display:block; font-weight:600; font-size:13px; color:var(--muted); }
+.practice { border: 2px solid #2563eb22; background: #f5f8ff; border-radius: 12px; padding: 14px 18px; margin: 16px 0; }
+.practice > h4 { margin: 0 0 6px; color:#1d4ed8; }
+.chart-box { position: relative; background:#fff; border:1px solid var(--line); border-radius:10px; padding:6px; margin: 10px 0; }
+svg.chart { width: 100%; height: auto; display: block; }
+svg.chart.small { max-width: 420px; }
+.grid { stroke: #eaeef2; stroke-width: 1; } .grid.faint { stroke:#f3f4f6; }
+.axis { font-size: 11px; fill: #8b949e; }
+.lbl { font-size: 14px; fill: var(--fg); } .lbl.muted { fill: var(--muted); }
+.mark { fill: #c2410c; } .markt { font-size: 11px; fill: #fff; text-anchor: middle; font-weight: 700; }
+.tip { position:absolute; display:none; pointer-events:none; background:#1f2328ee; color:#fff; font-size:12.5px; line-height:1.5; padding:8px 10px; border-radius:8px; z-index:5; width:180px; }
+.tip .u { color:#7ee2a8; } .tip .d { color:#ffa198; } .tip .muted { color:#c9d1d9; }
+.scheme { display:flex; gap:8px; flex-wrap:wrap; align-items:center; font-size:14px; margin: 8px 0 0; }
+.scheme button, .tabs button { border:1px solid var(--line); background:#fff; border-radius:999px; padding:4px 12px; cursor:pointer; font-size:13.5px; }
+.scheme button.on, .tabs button.on { background:var(--fg); color:#fff; border-color:var(--fg); }
+.tabs { display:flex; gap:8px; flex-wrap:wrap; margin: 10px 0 4px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; margin: 8px 0; }
+th, td { border: 1px solid var(--line); padding: 6px 9px; text-align: left; vertical-align: top; }
+th { background: #f6f8fa; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.kpi { display:grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin: 10px 0; }
+.kpi div { background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
+.kpi b { display:block; font-size: 20px; } .kpi span { font-size: 13px; color: var(--muted); }
+.q { background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:12px 0; }
+.q .opts { display:flex; flex-direction:column; gap:6px; margin-top:8px; }
+.q button.opt { text-align:left; border:1px solid var(--line); background:#fff; border-radius:8px; padding:7px 12px; cursor:pointer; font-size:15px; }
+.q button.opt:hover { background:#f6f8fa; }
+.q button.right { border-color: var(--ok); background:#dafbe1; } .q button.wrong { border-color: var(--bad); background:#ffebe9; }
+.q .exp { display:none; margin-top:10px; font-size:15px; background:#f6f8fa; border-radius:8px; padding:10px 12px; }
+#score { position: sticky; bottom: 12px; display:inline-block; background:var(--fg); color:#fff; padding:6px 14px; border-radius:999px; font-size:14px; }
+.terms { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+.terms div { background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:14.5px; }
+.terms b { display:block; }
+.toc { font-size: 14.5px; columns: 2; }
+.disclaimer { color: var(--muted); font-size: 13px; margin-top: 40px; }
+nav.top { font-size: 14px; margin-bottom: 14px; } nav.top a { color: var(--muted); }
+.muted { color: var(--muted); }
+#chat-btn { position: fixed; right: 22px; bottom: 22px; z-index: 20; background: var(--fg); color: #fff; border: 0; border-radius: 999px; padding: 11px 18px; font-size: 15px; cursor: pointer; box-shadow: 0 4px 14px #0003; }
+#chat-panel { position: fixed; right: 22px; bottom: 76px; z-index: 20; width: min(420px, calc(100vw - 30px)); height: min(600px, calc(100vh - 110px)); background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 10px 30px #0002; display: flex; flex-direction: column; }
+#chat-panel[hidden] { display: none; }
+.chat-head { display: flex; gap: 8px; align-items: baseline; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.chat-head .muted { flex: 1; font-size: 12px; }
+.chat-head button { border: 0; background: none; cursor: pointer; color: var(--muted); font-size: 13px; }
+#chat-log { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; font-size: 14.5px; line-height: 1.65; }
+.msg { max-width: 88%; padding: 8px 11px; border-radius: 12px; word-break: break-word; }
+.msg.user { align-self: flex-end; background: #1f2328; color: #fff; }
+.msg.bot { align-self: flex-start; background: #f3f4f6; }
+.msg code { background: #0000000f; padding: 0 4px; border-radius: 4px; }
+.chip { margin: 0 12px 6px; font-size: 12.5px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 999px; padding: 2px 6px 2px 10px; display: flex; justify-content: space-between; }
+.chip[hidden] { display: none; }
+.chip button { border: 0; background: none; cursor: pointer; }
+#chat-form { display: flex; gap: 8px; padding: 0 12px 6px; }
+#chat-form textarea { flex: 1; resize: none; border: 1px solid var(--line); border-radius: 10px; padding: 7px 9px; font: inherit; font-size: 14px; }
+#chat-form button { border: 0; background: var(--fg); color: #fff; border-radius: 10px; padding: 0 14px; cursor: pointer; }
+.chat-foot { font-size: 11.5px; padding: 0 12px 9px; }
+#chat-settings { padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 13.5px; display: flex; flex-direction: column; gap: 6px; background: #fafbfc; }
+#chat-settings[hidden], #chat-settings .base-row[hidden] { display: none; }
+#chat-settings p { margin: 0 0 4px; font-size: 12.5px; line-height: 1.55; }
+#chat-settings label { display: flex; flex-direction: column; gap: 2px; }
+#chat-settings input, #chat-settings select { font: inherit; padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px; }
+#chat-settings .row { display: flex; gap: 8px; margin-top: 4px; }
+#chat-settings .row button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 4px 12px; cursor: pointer; }
+#chat-settings .row button[type=submit] { background: var(--fg); color: #fff; border-color: var(--fg); }
+.picker { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: flex-end; }
+.picker label { display: flex; flex-direction: column; font-size: 13px; color: var(--muted); gap: 3px; }
+.picker select, .picker input { font: inherit; font-size: 15px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px; color: var(--fg); background: #fff; }
+.picker button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 14px; }
+.picker .data-note { flex-basis: 100%; }
+.clabel { font-size: 10px; fill: #c2410c; text-anchor: middle; font-weight: 600; }
+.book.general::before { content: "📘 通用讲法（书中细节以原书为准）"; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 10px; margin: 12px 0; }
+.gallery .g { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; grid-template-columns: 52px 1fr; gap: 4px 10px; font-size: 14px; line-height: 1.6; }
+.gallery .g .pic { grid-row: span 3; text-align: center; }
+.gallery .g .pic small { display: block; color: var(--muted); font-size: 11px; }
+.gallery .g b.t { font-size: 15px; }
+.gallery .g .rule { color: var(--muted); font-size: 12.5px; }
+.gallery .g a { color: #1d4ed8; cursor: pointer; font-size: 12.5px; }
+.gallery .g.none { opacity: .55; }
+.pair { display: flex; gap: 28px; align-items: flex-end; justify-content: center; padding: 8px; }
+.pair div { text-align: center; font-size: 13px; color: var(--muted); }
+.q .mini { display: block; margin: 8px 0; }
+#recent-rows .mini { width: 26px; height: 44px; }
+#recent-rows td { vertical-align: middle; padding-top: 3px; padding-bottom: 3px; }
+.clabel.bull { fill: #1d4ed8; } .clabel.bear { fill: #c2410c; }
+.pcard { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin: 12px 0; display: grid; grid-template-columns: 130px 1fr; gap: 6px 16px; font-size: 14.5px; line-height: 1.65; }
+.pcard .demo { text-align: center; font-size: 11.5px; color: var(--muted); }
+.pcard h4 { margin: 0; font-size: 16px; } .pcard .tag { font-size: 12px; padding: 1px 8px; border-radius: 999px; margin-left: 6px; font-weight: normal; }
+.tag.bull { background: #dbeafe; color: #1d4ed8; } .tag.bear { background: #ffedd5; color: #c2410c; } .tag.neu { background: #f3f4f6; color: #555; }
+.pcard .rule { color: var(--muted); font-size: 13px; }
+.pcard .ex { grid-column: 1 / -1; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; background: #f6f8fa; border-radius: 8px; padding: 8px 10px; font-size: 13.5px; }
+.pcard .stat { grid-column: 1 / -1; font-size: 13.5px; }
+.pcard a { color: #1d4ed8; cursor: pointer; }
+.small-n { color: var(--muted); }
+@media (max-width: 600px) { .pcard { grid-template-columns: 1fr; } }
+.up { color: #1a7f37; } .dn { color: #cf222e; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; } @media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
+.two h4 { margin: 12px 0 4px; }
+#filters { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+#filters button { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 4px 12px; cursor: pointer; font-size: 13.5px; }
+#filters button.on { background: var(--fg); color: #fff; border-color: var(--fg); }
+main.wide { max-width: 1180px; }
+.private-badge { display: inline-block; background: #7c3aed; color: #fff; font-size: 12px; border-radius: 999px; padding: 2px 10px; margin-left: 8px; vertical-align: middle; }
+.clabel.fail { fill: #9aa4b2; font-weight: 500; } .clabel.turnL { fill: #1d4ed8; font-size: 11.5px; } .clabel.turnH { fill: #c2410c; font-size: 11.5px; }
+.clabel.pend { fill: #7c3aed; } .clabel.recent { fill: #374151; }
+.turn { display: grid; grid-template-columns: 150px 1fr; gap: 4px 14px; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin: 8px 0; font-size: 14px; }
+.turn .ex { grid-column: 1 / -1; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.selfcheck { border: 2px solid #7c3aed33; background: #faf5ff; border-radius: 12px; padding: 12px 16px; margin: 14px 0; }
+.selfcheck h4 { margin: 0 0 6px; color: #6d28d9; }
+.tag.tg { background: #ede9fe; color: #6d28d9; }
+.tradet { font-size: 9.5px; fill: #fff; text-anchor: middle; font-weight: 700; pointer-events: none; }
+.tdot { display: inline-block; width: 17px; height: 17px; line-height: 17px; border-radius: 50%; color: #fff; text-align: center; font-size: 10px; }
+.tdot.buy, .tag.buy { background: #059669; color: #fff; } .tdot.sell, .tag.sell { background: #c026d3; color: #fff; }
+.band-l { paint-order: stroke; stroke: #fff; stroke-width: 3px; stroke-linejoin: round; font-weight: 600; }
+.clabel { paint-order: stroke; stroke: #fff; stroke-width: 2.5px; stroke-linejoin: round; }
+.axis-tag { font-size: 10.5px; fill: #fff; text-anchor: middle; font-weight: 700; }
+.grade { display: inline-block; padding: 1px 8px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: help; }
+.grade.ga { background: #dcfce7; color: #166534; } .grade.gb { background: #e0f2fe; color: #075985; } .grade.gc { background: #fef9c3; color: #854d0e; } .grade.gd { background: #fee2e2; color: #991b1b; }
+/* 复盘页成交表：每列固定对齐方式，标签不折行，备注悬挂缩进 */
+table.deals td { vertical-align: top; }
+table.deals .grade { white-space: nowrap; }
+table.deals td.res { white-space: nowrap; text-align: left; font-variant-numeric: tabular-nums; }
+table.deals td.quad { white-space: nowrap; line-height: 1.5; }
+table.deals td.notes { font-size: 13px; min-width: 280px; }
+table.deals .note { display: grid; grid-template-columns: 1.6em 1fr; align-items: start; line-height: 1.55; margin-bottom: 3px; }
+table.deals .note.hind { color: #4b5563; }
+table.deals td:first-child, table.deals td:nth-child(3) { white-space: nowrap; }
+.note-btn { color: #1d4ed8; cursor: pointer; font-size: 13px; }
+.note-box { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #fafaf9; border-radius: 8px; padding: 10px; }
+@media (max-width: 900px) { .note-box { grid-template-columns: 1fr; } }
+.note-draft pre { white-space: pre-wrap; font: inherit; font-size: 13px; line-height: 1.6; margin: 6px 0 0; color: #374151; }
+.note-box textarea { width: 100%; font: inherit; font-size: 13.5px; line-height: 1.6; border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+.note-actions { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.note-actions button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 5px 12px; cursor: pointer; }
+.note-actions button.pri { background: var(--fg); color: #fff; border-color: var(--fg); }
+.sync-warn { background: #fef2f2; border: 1px solid #fecaca; color: #7f1d1d; border-radius: 10px; padding: 10px 14px; margin: 10px 0; font-size: 14px; }
+.page-tabs button { font-size: 15px; padding: 6px 16px; }
+.viz-title { font-weight: 600; font-size: 14.5px; margin: 14px 0 4px; }
+.viz-in { font-size: 13px; fill: #fff; font-weight: 600; } .viz-sub { font-size: 12px; fill: #656d76; }
+.viz-lab { font-size: 13.5px; fill: #1f2328; } .viz-val { font-size: 13.5px; fill: #1f2328; font-weight: 600; }
+.viz-legend { display: flex; gap: 14px; font-size: 12.5px; color: #656d76; margin-top: 2px; } .viz-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+.viz-box { position: relative; }
+.kpi div { display: flex; flex-direction: column; } .kpi div span:first-child { font-size: 13px; color: var(--muted); }
+.q2grid { display: grid; grid-template-columns: 130px 1fr 1fr; gap: 6px; max-width: 520px; font-size: 13.5px; }
+.q2h { color: var(--muted); align-self: end; text-align: center; } .q2h.side { text-align: right; align-self: center; padding-right: 6px; }
+.q2 { border-radius: 10px; padding: 12px; text-align: center; border: 1px solid var(--line); background: #fff; }
+.q2 b { font-size: 24px; display: block; } .q2 span { color: var(--muted); font-size: 12px; }
+.q2.gg { background: #eaf2fc; } .q2.bb { background: #fdf0ea; } .q2.big { outline: 2px solid #1f2328; }
+.focus { display: grid; gap: 8px; } .focus .f { background: #fff; border: 1px solid var(--line); border-left: 4px solid #a3a39e; border-radius: 8px; padding: 8px 12px; font-size: 14px; }
+.focus .f.warn { border-left-color: #eb6834; } .focus .f.good { border-left-color: #2a78d6; }
+.top-nav { display: flex; gap: 8px; margin: 6px 0 14px; } .top-nav a { border: 1px solid var(--line); border-radius: 999px; padding: 5px 14px; text-decoration: none; color: var(--fg); background: #fff; font-size: 14px; }
+.top-nav a.on { background: var(--fg); color: #fff; border-color: var(--fg); }
+.story-days { margin: 6px 0; padding-left: 0; list-style: none; font-size: 14px; } .story-days li { margin: 3px 0; display: flex; gap: 8px; align-items: center; }
+.story-days .pw { display: inline-block; width: 12px; height: 12px; border-radius: 2px; flex: none; }
+.filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 10px; }
+.filter-row button { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 4px 12px; cursor: pointer; font-size: 13.5px; }
+.filter-row button.on { background: var(--fg); color: #fff; border-color: var(--fg); }
+.live-card { background: #fff; border: 1px solid var(--line); border-left: 4px solid #2a78d6; border-radius: 10px; padding: 10px 12px; margin: 10px 0; }
+.live-card.d { border-left-color: #eb6834; }
+.lc-head { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; } .lc-px { margin-left: auto; font-size: 16px; }
+.lc-body { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+@media (max-width: 900px) { .lc-body { grid-template-columns: 1fr; } }
+.lc-text p { margin: 4px 0; font-size: 14px; line-height: 1.6; }
+.rp { background: #fff; border: 1px solid var(--line); border-left: 5px solid #a3a39e; border-radius: 10px; padding: 10px 16px; margin: 10px 0; font-size: 14.5px; }
+.rp h4 { margin: 2px 0 6px; font-size: 16px; } .rp p { margin: 5px 0; line-height: 1.65; }
+.rp.good { border-left-color: #2a78d6; } .rp.bad { border-left-color: #eb6834; } .rp.warn { border-left-color: #eb6834; background: #fffaf7; } .rp.info { border-left-color: #7c3aed; }
+.rp .fix { background: #f6f8fa; border-radius: 8px; padding: 6px 10px; }
+</style></head><body><main>
+    <h1>📚 蜡烛图学习计划</h1>
+    <p class="sub">《日本蜡烛图分析技术从入门到精通（All About Candlestick Charting）》Wayne A. Corbitt 著，梁岩、刘璐 译 · 节奏：每天 1 章；学有余力再加 · 所有实战以微软（MSFT）当天日线为例</p>
+    <div class="card">学习目标：<b>在实战中看懂走势，知道每个走势对应哪个知识点。</b><br>
+    每章页面 = 书中要点（标注页码）+ MSFT 真实数据实战 + 练习题。美股未收盘时自动使用前一交易日数据并在页面顶部注明。<br>
+    进度：已完成 <b>1 / 11</b> 章</div>
+    <table><tr><th>日期</th><th>章节</th><th>页码</th><th>重点</th><th>MSFT 实战</th><th>状态</th></tr><tr><th colspan="6">第一部分 蜡烛图的构成和形态</th></tr><tr><td>11/04<br><span class="muted">第 1 天</span></td><td><b>第 1 章</b><br><a href="chapters/ch01.html">蜡烛的启迪</a></td><td>p.3–16</td><td>蜡烛起源；阳烛/阴烛；技术分析五原则；供需与成交量；四种图表对比</td><td>拆解当日 MSFT 蜡烛；月度高低点看积累/分发；四种图同屏对比</td><td>已完成</td></tr><tr><td>11/05<br><span class="muted">第 2 天</span></td><td><b>第 2 章</b><br><a href="chapters/ch02.html">蜡烛图的构成和分析</a></td><td>p.17–26</td><td>基本蜡烛线：长短实体、上下影线、十字星、纺锤线</td><td>把 MSFT 最近 60 根蜡烛逐一分类</td><td>已生成</td></tr><tr><td>11/06<br><span class="muted">第 3 天</span></td><td><b>第 3 章</b><br><a href="chapters/ch03.html">蜡烛图的反转形态</a></td><td>p.27–69</td><td>锤子线、吞没、乌云盖顶、星线等反转形态（全书最长，43 页）<br><span class="muted">⚠️ 篇幅约为其他章 2–3 倍，可拆成两天</span></td><td>在 MSFT 一年数据里自动标出反转形态并复盘后续走势</td><td>已生成</td></tr><tr><td>11/07<br><span class="muted">第 4 天</span></td><td><b>第 4 章</b><br><a href="chapters/ch04.html">蜡烛图的持续形态</a></td><td>p.70–96</td><td>三白兵、上升/下降三法、跳空持续等</td><td>找 MSFT 上涨途中的持续形态</td><td>已生成</td></tr><tr><th colspan="6">第二部分 蜡烛图形态与西方技术的结合</th></tr><tr><td>11/08<br><span class="muted">第 5 天</span></td><td><b>第 5 章</b><br><a href="chapters/ch05.html">技术分析：趋势、支撑和阻力</a></td><td>p.99–122</td><td>趋势线、支撑与阻力、形态出现位置的重要性</td><td>画 MSFT 支撑/阻力，回看第 1 章的老高点</td><td>已生成</td></tr><tr><td>11/09<br><span class="muted">第 6 天</span></td><td><b>第 6 章</b><br><a href="chapters/ch06.html">蜡烛图和动能指标</a></td><td>p.123–147</td><td>RSI、MACD、随机指标等与蜡烛形态配合</td><td>MSFT 叠加动能指标，看背离</td><td>已生成</td></tr><tr><td>11/10<br><span class="muted">第 7 天</span></td><td><b>第 7 章</b><br><a href="chapters/ch07.html">蜡烛图和成交量</a></td><td>p.148–167</td><td>量价配合确认形态</td><td>MSFT 放量形态与缩量形态的后续对比</td><td>已生成</td></tr><tr><td>11/11<br><span class="muted">第 8 天</span></td><td><b>第 8 章</b><br><a href="chapters/ch08.html">积累数据，整合片段</a></td><td>p.168–188</td><td>把形态、趋势、指标、成交量整合成完整判断</td><td>对当日 MSFT 做一份完整读图报告</td><td>已生成</td></tr><tr><th colspan="6">第三部分 蜡烛图的「伙伴」：其他图表分析方法</th></tr><tr><td>11/12<br><span class="muted">第 9 天</span></td><td><b>第 9 章</b><br><a href="chapters/ch09.html">新三价线指标</a></td><td>p.191–209</td><td>新三价线（Three Line Break）的画法与信号</td><td>用 MSFT 画新三价线</td><td>已生成</td></tr><tr><td>11/13<br><span class="muted">第 10 天</span></td><td><b>第 10 章</b><br><a href="chapters/ch10.html">砖形图</a></td><td>p.210–222</td><td>砖形图（Renko）的画法与信号</td><td>用 MSFT 画砖形图</td><td>已生成</td></tr><tr><td>11/14<br><span class="muted">第 11 天</span></td><td><b>第 11 章</b><br><a href="chapters/ch11.html">折线图</a></td><td>p.223–</td><td>日本折线图（一般认为即 Kagi 图）的画法与信号</td><td>用 MSFT 画折线图，与蜡烛图对照</td><td>已生成</td></tr></table>
+    <p class="muted" style="font-size:14px">日期按每天一章排；某天学不完就顺延，有余力可以提前学下一章。</p>
+    <p class="disclaimer">个人学习笔记，不构成投资建议。</p>
+    </main></body></html>

@@ -1,0 +1,1426 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第 1 章 蜡烛的启迪 · 日本蜡烛图分析技术学习笔记</title>
+<style>:root { --fg:#1f2328; --muted:#656d76; --line:#d0d7de; --bg:#fbfaf7; --card:#fff; --accent:#c2410c; --ok:#1a7f37; --bad:#cf222e; }
+* { box-sizing: border-box; }
+body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.75 -apple-system,"PingFang SC","Hiragino Sans GB",sans-serif; }
+main { max-width: 960px; margin: 0 auto; padding: 28px 22px 80px; }
+h1 { font-size: 30px; margin: 0 0 4px; }
+h2 { font-size: 22px; margin: 44px 0 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+h3 { font-size: 18px; margin: 26px 0 6px; }
+.sub { color: var(--muted); margin: 0 0 18px; }
+.page { color: var(--muted); font-size: 13px; font-weight: normal; margin-left: 6px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; margin: 14px 0; }
+.data-note { background:#fff7ed; border:1px solid #fed7aa; border-radius:10px; padding:10px 14px; font-size:14px; }
+.tip-box { border-left: 4px solid var(--accent); background:#fff; padding: 10px 14px; margin: 14px 0; border-radius: 0 8px 8px 0; }
+.book { border-left: 4px solid #8b949e; background:#f6f8fa; padding: 10px 14px; margin: 14px 0; border-radius: 0 8px 8px 0; font-size: 15px; }
+.book::before { content: "📖 书中要点（转述）"; display:block; font-weight:600; font-size:13px; color:var(--muted); }
+.practice { border: 2px solid #2563eb22; background: #f5f8ff; border-radius: 12px; padding: 14px 18px; margin: 16px 0; }
+.practice > h4 { margin: 0 0 6px; color:#1d4ed8; }
+.chart-box { position: relative; background:#fff; border:1px solid var(--line); border-radius:10px; padding:6px; margin: 10px 0; }
+svg.chart { width: 100%; height: auto; display: block; }
+svg.chart.small { max-width: 420px; }
+.grid { stroke: #eaeef2; stroke-width: 1; } .grid.faint { stroke:#f3f4f6; }
+.axis { font-size: 11px; fill: #8b949e; }
+.lbl { font-size: 14px; fill: var(--fg); } .lbl.muted { fill: var(--muted); }
+.mark { fill: #c2410c; } .markt { font-size: 11px; fill: #fff; text-anchor: middle; font-weight: 700; }
+.tip { position:absolute; display:none; pointer-events:none; background:#1f2328ee; color:#fff; font-size:12.5px; line-height:1.5; padding:8px 10px; border-radius:8px; z-index:5; width:180px; }
+.tip .u { color:#7ee2a8; } .tip .d { color:#ffa198; } .tip .muted { color:#c9d1d9; }
+.scheme { display:flex; gap:8px; flex-wrap:wrap; align-items:center; font-size:14px; margin: 8px 0 0; }
+.scheme button, .tabs button { border:1px solid var(--line); background:#fff; border-radius:999px; padding:4px 12px; cursor:pointer; font-size:13.5px; }
+.scheme button.on, .tabs button.on { background:var(--fg); color:#fff; border-color:var(--fg); }
+.tabs { display:flex; gap:8px; flex-wrap:wrap; margin: 10px 0 4px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; margin: 8px 0; }
+th, td { border: 1px solid var(--line); padding: 6px 9px; text-align: left; vertical-align: top; }
+th { background: #f6f8fa; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.kpi { display:grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin: 10px 0; }
+.kpi div { background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px 12px; }
+.kpi b { display:block; font-size: 20px; } .kpi span { font-size: 13px; color: var(--muted); }
+.q { background:#fff; border:1px solid var(--line); border-radius:10px; padding:14px 16px; margin:12px 0; }
+.q .opts { display:flex; flex-direction:column; gap:6px; margin-top:8px; }
+.q button.opt { text-align:left; border:1px solid var(--line); background:#fff; border-radius:8px; padding:7px 12px; cursor:pointer; font-size:15px; }
+.q button.opt:hover { background:#f6f8fa; }
+.q button.right { border-color: var(--ok); background:#dafbe1; } .q button.wrong { border-color: var(--bad); background:#ffebe9; }
+.q .exp { display:none; margin-top:10px; font-size:15px; background:#f6f8fa; border-radius:8px; padding:10px 12px; }
+#score { position: sticky; bottom: 12px; display:inline-block; background:var(--fg); color:#fff; padding:6px 14px; border-radius:999px; font-size:14px; }
+.terms { display:grid; grid-template-columns: repeat(auto-fit,minmax(220px,1fr)); gap:10px; }
+.terms div { background:#fff; border:1px solid var(--line); border-radius:10px; padding:10px 12px; font-size:14.5px; }
+.terms b { display:block; }
+.toc { font-size: 14.5px; columns: 2; }
+.disclaimer { color: var(--muted); font-size: 13px; margin-top: 40px; }
+nav.top { font-size: 14px; margin-bottom: 14px; } nav.top a { color: var(--muted); }
+.muted { color: var(--muted); }
+#chat-btn { position: fixed; right: 22px; bottom: 22px; z-index: 20; background: var(--fg); color: #fff; border: 0; border-radius: 999px; padding: 11px 18px; font-size: 15px; cursor: pointer; box-shadow: 0 4px 14px #0003; }
+#chat-panel { position: fixed; right: 22px; bottom: 76px; z-index: 20; width: min(420px, calc(100vw - 30px)); height: min(600px, calc(100vh - 110px)); background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 10px 30px #0002; display: flex; flex-direction: column; }
+#chat-panel[hidden] { display: none; }
+.chat-head { display: flex; gap: 8px; align-items: baseline; padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.chat-head .muted { flex: 1; font-size: 12px; }
+.chat-head button { border: 0; background: none; cursor: pointer; color: var(--muted); font-size: 13px; }
+#chat-log { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; font-size: 14.5px; line-height: 1.65; }
+.msg { max-width: 88%; padding: 8px 11px; border-radius: 12px; word-break: break-word; }
+.msg.user { align-self: flex-end; background: #1f2328; color: #fff; }
+.msg.bot { align-self: flex-start; background: #f3f4f6; }
+.msg code { background: #0000000f; padding: 0 4px; border-radius: 4px; }
+.chip { margin: 0 12px 6px; font-size: 12.5px; background: #fff7ed; border: 1px solid #fed7aa; border-radius: 999px; padding: 2px 6px 2px 10px; display: flex; justify-content: space-between; }
+.chip[hidden] { display: none; }
+.chip button { border: 0; background: none; cursor: pointer; }
+#chat-form { display: flex; gap: 8px; padding: 0 12px 6px; }
+#chat-form textarea { flex: 1; resize: none; border: 1px solid var(--line); border-radius: 10px; padding: 7px 9px; font: inherit; font-size: 14px; }
+#chat-form button { border: 0; background: var(--fg); color: #fff; border-radius: 10px; padding: 0 14px; cursor: pointer; }
+.chat-foot { font-size: 11.5px; padding: 0 12px 9px; }
+#chat-settings { padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 13.5px; display: flex; flex-direction: column; gap: 6px; background: #fafbfc; }
+#chat-settings[hidden], #chat-settings .base-row[hidden] { display: none; }
+#chat-settings p { margin: 0 0 4px; font-size: 12.5px; line-height: 1.55; }
+#chat-settings label { display: flex; flex-direction: column; gap: 2px; }
+#chat-settings input, #chat-settings select { font: inherit; padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px; }
+#chat-settings .row { display: flex; gap: 8px; margin-top: 4px; }
+#chat-settings .row button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 4px 12px; cursor: pointer; }
+#chat-settings .row button[type=submit] { background: var(--fg); color: #fff; border-color: var(--fg); }
+.picker { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: flex-end; }
+.picker label { display: flex; flex-direction: column; font-size: 13px; color: var(--muted); gap: 3px; }
+.picker select, .picker input { font: inherit; font-size: 15px; padding: 5px 8px; border: 1px solid var(--line); border-radius: 8px; color: var(--fg); background: #fff; }
+.picker button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 6px 12px; cursor: pointer; font-size: 14px; }
+.picker .data-note { flex-basis: 100%; }
+.clabel { font-size: 10px; fill: #c2410c; text-anchor: middle; font-weight: 600; }
+.book.general::before { content: "📘 通用讲法（书中细节以原书为准）"; }
+.gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 10px; margin: 12px 0; }
+.gallery .g { background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: grid; grid-template-columns: 52px 1fr; gap: 4px 10px; font-size: 14px; line-height: 1.6; }
+.gallery .g .pic { grid-row: span 3; text-align: center; }
+.gallery .g .pic small { display: block; color: var(--muted); font-size: 11px; }
+.gallery .g b.t { font-size: 15px; }
+.gallery .g .rule { color: var(--muted); font-size: 12.5px; }
+.gallery .g a { color: #1d4ed8; cursor: pointer; font-size: 12.5px; }
+.gallery .g.none { opacity: .55; }
+.pair { display: flex; gap: 28px; align-items: flex-end; justify-content: center; padding: 8px; }
+.pair div { text-align: center; font-size: 13px; color: var(--muted); }
+.q .mini { display: block; margin: 8px 0; }
+#recent-rows .mini { width: 26px; height: 44px; }
+#recent-rows td { vertical-align: middle; padding-top: 3px; padding-bottom: 3px; }
+.clabel.bull { fill: #1d4ed8; } .clabel.bear { fill: #c2410c; }
+.pcard { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin: 12px 0; display: grid; grid-template-columns: 130px 1fr; gap: 6px 16px; font-size: 14.5px; line-height: 1.65; }
+.pcard .demo { text-align: center; font-size: 11.5px; color: var(--muted); }
+.pcard h4 { margin: 0; font-size: 16px; } .pcard .tag { font-size: 12px; padding: 1px 8px; border-radius: 999px; margin-left: 6px; font-weight: normal; }
+.tag.bull { background: #dbeafe; color: #1d4ed8; } .tag.bear { background: #ffedd5; color: #c2410c; } .tag.neu { background: #f3f4f6; color: #555; }
+.pcard .rule { color: var(--muted); font-size: 13px; }
+.pcard .ex { grid-column: 1 / -1; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; background: #f6f8fa; border-radius: 8px; padding: 8px 10px; font-size: 13.5px; }
+.pcard .stat { grid-column: 1 / -1; font-size: 13.5px; }
+.pcard a { color: #1d4ed8; cursor: pointer; }
+.small-n { color: var(--muted); }
+@media (max-width: 600px) { .pcard { grid-template-columns: 1fr; } }
+.up { color: #1a7f37; } .dn { color: #cf222e; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; } @media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
+.two h4 { margin: 12px 0 4px; }
+#filters { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+#filters button { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 4px 12px; cursor: pointer; font-size: 13.5px; }
+#filters button.on { background: var(--fg); color: #fff; border-color: var(--fg); }
+main.wide { max-width: 1180px; }
+.private-badge { display: inline-block; background: #7c3aed; color: #fff; font-size: 12px; border-radius: 999px; padding: 2px 10px; margin-left: 8px; vertical-align: middle; }
+.clabel.fail { fill: #9aa4b2; font-weight: 500; } .clabel.turnL { fill: #1d4ed8; font-size: 11.5px; } .clabel.turnH { fill: #c2410c; font-size: 11.5px; }
+.clabel.pend { fill: #7c3aed; } .clabel.recent { fill: #374151; }
+.turn { display: grid; grid-template-columns: 150px 1fr; gap: 4px 14px; background: #fff; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin: 8px 0; font-size: 14px; }
+.turn .ex { grid-column: 1 / -1; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.selfcheck { border: 2px solid #7c3aed33; background: #faf5ff; border-radius: 12px; padding: 12px 16px; margin: 14px 0; }
+.selfcheck h4 { margin: 0 0 6px; color: #6d28d9; }
+.tag.tg { background: #ede9fe; color: #6d28d9; }
+.tradet { font-size: 9.5px; fill: #fff; text-anchor: middle; font-weight: 700; pointer-events: none; }
+.tdot { display: inline-block; width: 17px; height: 17px; line-height: 17px; border-radius: 50%; color: #fff; text-align: center; font-size: 10px; }
+.tdot.buy, .tag.buy { background: #059669; color: #fff; } .tdot.sell, .tag.sell { background: #c026d3; color: #fff; }
+.band-l { paint-order: stroke; stroke: #fff; stroke-width: 3px; stroke-linejoin: round; font-weight: 600; }
+.clabel { paint-order: stroke; stroke: #fff; stroke-width: 2.5px; stroke-linejoin: round; }
+.axis-tag { font-size: 10.5px; fill: #fff; text-anchor: middle; font-weight: 700; }
+.grade { display: inline-block; padding: 1px 8px; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: help; }
+.grade.ga { background: #dcfce7; color: #166534; } .grade.gb { background: #e0f2fe; color: #075985; } .grade.gc { background: #fef9c3; color: #854d0e; } .grade.gd { background: #fee2e2; color: #991b1b; }
+/* 复盘页成交表：每列固定对齐方式，标签不折行，备注悬挂缩进 */
+table.deals td { vertical-align: top; }
+table.deals .grade { white-space: nowrap; }
+table.deals td.res { white-space: nowrap; text-align: left; font-variant-numeric: tabular-nums; }
+table.deals td.quad { white-space: nowrap; line-height: 1.5; }
+table.deals td.notes { font-size: 13px; min-width: 280px; }
+table.deals .note { display: grid; grid-template-columns: 1.6em 1fr; align-items: start; line-height: 1.55; margin-bottom: 3px; }
+table.deals .note.hind { color: #4b5563; }
+table.deals td:first-child, table.deals td:nth-child(3) { white-space: nowrap; }
+.note-btn { color: #1d4ed8; cursor: pointer; font-size: 13px; }
+.note-box { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #fafaf9; border-radius: 8px; padding: 10px; }
+@media (max-width: 900px) { .note-box { grid-template-columns: 1fr; } }
+.note-draft pre { white-space: pre-wrap; font: inherit; font-size: 13px; line-height: 1.6; margin: 6px 0 0; color: #374151; }
+.note-box textarea { width: 100%; font: inherit; font-size: 13.5px; line-height: 1.6; border: 1px solid var(--line); border-radius: 8px; padding: 8px; }
+.note-actions { grid-column: 1 / -1; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.note-actions button { border: 1px solid var(--line); background: #fff; border-radius: 8px; padding: 5px 12px; cursor: pointer; }
+.note-actions button.pri { background: var(--fg); color: #fff; border-color: var(--fg); }
+.sync-warn { background: #fef2f2; border: 1px solid #fecaca; color: #7f1d1d; border-radius: 10px; padding: 10px 14px; margin: 10px 0; font-size: 14px; }
+.page-tabs button { font-size: 15px; padding: 6px 16px; }
+.viz-title { font-weight: 600; font-size: 14.5px; margin: 14px 0 4px; }
+.viz-in { font-size: 13px; fill: #fff; font-weight: 600; } .viz-sub { font-size: 12px; fill: #656d76; }
+.viz-lab { font-size: 13.5px; fill: #1f2328; } .viz-val { font-size: 13.5px; fill: #1f2328; font-weight: 600; }
+.viz-legend { display: flex; gap: 14px; font-size: 12.5px; color: #656d76; margin-top: 2px; } .viz-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+.viz-box { position: relative; }
+.kpi div { display: flex; flex-direction: column; } .kpi div span:first-child { font-size: 13px; color: var(--muted); }
+.q2grid { display: grid; grid-template-columns: 130px 1fr 1fr; gap: 6px; max-width: 520px; font-size: 13.5px; }
+.q2h { color: var(--muted); align-self: end; text-align: center; } .q2h.side { text-align: right; align-self: center; padding-right: 6px; }
+.q2 { border-radius: 10px; padding: 12px; text-align: center; border: 1px solid var(--line); background: #fff; }
+.q2 b { font-size: 24px; display: block; } .q2 span { color: var(--muted); font-size: 12px; }
+.q2.gg { background: #eaf2fc; } .q2.bb { background: #fdf0ea; } .q2.big { outline: 2px solid #1f2328; }
+.focus { display: grid; gap: 8px; } .focus .f { background: #fff; border: 1px solid var(--line); border-left: 4px solid #a3a39e; border-radius: 8px; padding: 8px 12px; font-size: 14px; }
+.focus .f.warn { border-left-color: #eb6834; } .focus .f.good { border-left-color: #2a78d6; }
+.top-nav { display: flex; gap: 8px; margin: 6px 0 14px; } .top-nav a { border: 1px solid var(--line); border-radius: 999px; padding: 5px 14px; text-decoration: none; color: var(--fg); background: #fff; font-size: 14px; }
+.top-nav a.on { background: var(--fg); color: #fff; border-color: var(--fg); }
+.story-days { margin: 6px 0; padding-left: 0; list-style: none; font-size: 14px; } .story-days li { margin: 3px 0; display: flex; gap: 8px; align-items: center; }
+.story-days .pw { display: inline-block; width: 12px; height: 12px; border-radius: 2px; flex: none; }
+.filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 10px; }
+.filter-row button { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 4px 12px; cursor: pointer; font-size: 13.5px; }
+.filter-row button.on { background: var(--fg); color: #fff; border-color: var(--fg); }
+.live-card { background: #fff; border: 1px solid var(--line); border-left: 4px solid #2a78d6; border-radius: 10px; padding: 10px 12px; margin: 10px 0; }
+.live-card.d { border-left-color: #eb6834; }
+.lc-head { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; } .lc-px { margin-left: auto; font-size: 16px; }
+.lc-body { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+@media (max-width: 900px) { .lc-body { grid-template-columns: 1fr; } }
+.lc-text p { margin: 4px 0; font-size: 14px; line-height: 1.6; }
+.rp { background: #fff; border: 1px solid var(--line); border-left: 5px solid #a3a39e; border-radius: 10px; padding: 10px 16px; margin: 10px 0; font-size: 14.5px; }
+.rp h4 { margin: 2px 0 6px; font-size: 16px; } .rp p { margin: 5px 0; line-height: 1.65; }
+.rp.good { border-left-color: #2a78d6; } .rp.bad { border-left-color: #eb6834; } .rp.warn { border-left-color: #eb6834; background: #fffaf7; } .rp.info { border-left-color: #7c3aed; }
+.rp .fix { background: #f6f8fa; border-radius: 8px; padding: 6px 10px; }
+</style>
+</head>
+<body>
+<main>
+<nav class="top"><a href="../index.html">← 学习计划总览</a></nav>
+<h1>第 1 章　蜡烛的启迪</h1>
+<p class="sub">《日本蜡烛图分析技术从入门到精通》Wayne A. Corbitt 著，梁岩、刘璐 译 · 对应原书 第 3–16 页 · 第 1 天</p>
+
+<div class="picker card">
+  <label>例子用哪只股票 <select id="pick-sym"></select></label>
+  <label>看哪一天 <input id="pick-date" type="date"></label>
+  <button id="pick-latest" type="button">回到最新交易日</button>
+  <div class="data-note" id="data-note">正在加载数据…</div>
+</div>
+<div class="scheme">图表配色：
+  <button data-scheme-btn="book">书中样式</button>
+  <button data-scheme-btn="us">绿涨红跌（美股软件）</button>
+  <button data-scheme-btn="cn">红涨绿跌（国内软件）</button>
+</div>
+
+<div class="card">
+  <b>今天学完你应该能做到：</b>
+  <ol>
+    <li>看着一根蜡烛，说出它的<b>开盘价、收盘价、最高价、最低价</b>，判断它是阳烛还是阴烛。</li>
+    <li>说出技术分析的<b>五条基本原则</b>，并用一只真实股票的走势各举一个例子。</li>
+    <li>分清<b>线形图、点数图、条形图、蜡烛图</b>四种图，知道蜡烛图好在哪里。</li>
+  </ol>
+  建议用时：读书 40 分钟 + 本页实战 30 分钟 + 练习题 10 分钟。<br>
+  上面可以换股票、换日期：页面里所有数字和点评都会按你选的那一天重新计算，相当于「回到那一天」看图。
+</div>
+
+<h2>1.1　蜡烛图从哪里来<span class="page">p.3–4</span></h2>
+<div class="book">作者概述：蜡烛图起源于 18 世纪中叶的日本米市，代表人物是<b>本间宗久</b>；西方普遍使用它是近几十年的事，尼森（Steve Nison）、莫里斯（Greg Morris）的书起了关键作用。很多形态名带有军事色彩，作者借此强调交易需要<b>计划、耐心、纪律和执行力</b>。</div>
+<p>零基础的你只需要记住一件事：<b>蜡烛图本质上是在记录买方和卖方每天的「交战结果」</b>。后面学的各种形态，就是在读一连串交战结果背后的情绪变化。</p>
+<p>这些概念适用于所有时间框架（日内、日、周、月），本笔记以<b>日蜡烛图</b>为主：一根蜡烛 = 一个交易日。</p>
+
+<h2>1.2　一根蜡烛：开盘价和收盘价的关系<span class="page">p.4，图 1-1</span></h2>
+<div class="book">要点：蜡烛图最直观的地方，是把<b>开盘价与收盘价谁高谁低</b>画成实体并上色。收盘高于开盘 → <b>阳烛</b>（书中为白色/空心）；收盘低于开盘 → <b>阴烛</b>（书中为黑色/实心）。日、周、月各级别都通用。</div>
+<div class="practice">
+  <h4>🔍 实战：拆解 <span data-v="label"></span> <span data-v="date"></span> 这一根蜡烛</h4>
+  <div class="chart-box" id="anatomy"></div>
+  <table>
+    <tr><th>价格</th><th>数值</th><th>意思</th></tr>
+    <tr><td>开盘价</td><td class="num" data-v="o"></td><td>当天第一笔成交的价格</td></tr>
+    <tr><td>最高价</td><td class="num" data-v="h"></td><td>当天买方最多推到这里（<span data-v="hiNote"></span>）</td></tr>
+    <tr><td>最低价</td><td class="num" data-v="l"></td><td>当天卖方最多压到这里</td></tr>
+    <tr><td>收盘价</td><td class="num" data-v="c"></td><td>当天最后的价格，也是「交战结果」</td></tr>
+  </table>
+  <p data-h="anatomy"></p>
+</div>
+
+<div class="tip-box"><b>⚠️ 新手最容易错的一点：颜色只比较「当天开盘价」和「当天收盘价」，不比较前一天。</b><br>
+所以「今天比昨天涨了」不等于阳烛。看两个真实例子：
+<ul data-h="examples"></ul>
+另外，书中用的是白/黑，你在券商 App 或看盘软件里看到的通常是彩色：<b>美股习惯绿涨红跌，国内习惯红涨绿跌</b>，正好相反。上面的配色按钮可以三种切换，建议改成你平时用的软件的样式。</div>
+
+<h2>1.3　技术分析的五条基本原则<span class="page">p.5–6</span></h2>
+<div class="book">要点：现代技术分析可追溯到 20 世纪初查尔斯·道的道氏理论。作者列出五条基础假设：① 价格反映一切已知因素；② 价格由参与者的预期推动；③ 价格变动有规律可循；④ 关注价格「怎么走」胜过「为什么走」；⑤ 历史常常重演。</div>
+
+<h3>原则 1　市场涵盖一切</h3>
+<p>股价是所有参与者（技术分析员、基本面分析人士、机构、基金经理……）知识和观点的总和。</p>
+<div class="practice"><h4>🔍 <span data-v="label"></span> 的例子</h4><p data-h="p1"></p></div>
+
+<h3>原则 2　价格由预期驱动 → 形成趋势</h3>
+<p>预期价格上涨的人买入，预期下跌的人卖出，一致的预期会让价格朝一个方向持续运动，这就是<b>趋势</b>（第 5 章细讲）。</p>
+<div class="practice"><h4>🔍 <span data-v="label"></span> 过去一年的收盘价（线形图）</h4>
+<div class="chart-box" id="year-line"></div><p data-h="p2"></p></div>
+
+<h3>原则 3　价格变动不是完全无规则的</h3>
+<div class="book">要点：作者认为图表能看出大资金是在<b>吸纳</b>还是<b>派发</b>：高点和低点一路抬高，是持续积累的迹象；高点和低点一路降低，是持续分发的迹象。</div>
+<div class="practice"><h4>🔍 用每个月的最高价、最低价验证</h4>
+<table><thead><tr><th>月份</th><th>当月最高</th><th>比上月</th><th>当月最低</th><th>比上月</th></tr></thead><tbody id="month-rows"></tbody></table>
+<p data-h="p3"></p></div>
+
+<h3>原则 4　「价格怎么走」比「为什么这么走」更重要</h3>
+<div class="book">要点：既然价格已经包含了信息，技术分析者就该把注意力放在价格方向和成交量上，尽量不被新闻和他人观点带偏。</div>
+<div class="practice"><h4>🔍 用这条原则看 <span data-v="date"></span></h4><p data-h="p4"></p></div>
+
+<h3>原则 5　历史往往会重演</h3>
+<div class="book">要点：市场情绪会以相似的价格与成交量形态反复出现，技术分析借此形成合理预期。作者强调目标不是每次都对，而是找出<b>胜算更高</b>的机会。</div>
+<div class="practice"><h4>🔍 <span data-v="label"></span> 的例子（预告第 5 章）</h4><p data-h="p5"></p></div>
+
+<h2>1.4　技术分析衡量的是供需，成交量是关键<span class="page">p.7，图 1-2</span></h2>
+<div class="book">要点：价格加成交量最能反映供需。卖的人多于买的人，价格下行；反之上行。成交量（一段时间内成交的股数）用来衡量一次价格变动有多「可信」：<b>量越大，这次变动的分量越重</b>。</div>
+<div class="practice"><h4>🔍 <span data-v="label"></span> <span data-v="date"></span> 的成交量</h4>
+<div class="kpi">
+  <div><b data-v="vol"></b><span>当天成交量（股）</span></div>
+  <div><b data-v="v50"></b><span>此前 50 个交易日日均</span></div>
+  <div><b data-v="vratio"></b><span>放量倍数</span></div>
+  <div><b data-v="dayChg"></b><span>较前一日收盘</span></div>
+</div>
+<p>再看近半年成交量最大的几天：</p>
+<table><thead><tr><th>日期</th><th>成交量</th><th>相当于 50 日均量</th><th>当天涨跌</th></tr></thead><tbody id="vol-rows"></tbody></table>
+<p data-h="vol"></p></div>
+
+<h2>1.5　掌握技术分析需要大量实践<span class="page">p.10–11</span></h2>
+<div class="book">要点：会装软件、会调指标，不等于会分析，作者用了一个「站在车库里不会让你变成汽车」的比喻。分析能力靠反复试错积累；方法宜简不宜繁，过度复杂的系统在突然反转时容易失灵。蜡烛形态主要反映<b>一周以内</b>的短期变化，但短期变化可能引出更大的行情，做长线要配合更大周期的分析。</div>
+<p>落到学习上：每学一章，就用一只股票的日线找一次本章讲到的东西。换几只性格不同的股票试试，比如稳健的 KO、波动大的 TSLA、代表大盘的 SPY，同样的道理在不同股票上表现得不一样。</p>
+
+<h2>1.6　四种常见图表<span class="page">p.11–13，图 1-3 至 1-6</span></h2>
+<p>书中用一只股票半年的走势做对比。这里换成<b><span data-v="label"></span> 最近约半年（<span data-v="sixStart"></span> 至 <span data-v="date"></span>）</b>，同一段数据画成四种图，切换着看：</p>
+<div class="tabs" data-group="ct">
+  <button data-key="line">① 线形图</button><button data-key="pnf">② 点数图</button><button data-key="bar">③ 条形图</button><button data-key="candle" class="on">④ 蜡烛图</button>
+</div>
+<div class="chart-box" data-pane="ct" data-key="line" id="c-line" hidden></div>
+<div class="chart-box" data-pane="ct" data-key="pnf" id="c-pnf" hidden></div>
+<div class="chart-box" data-pane="ct" data-key="bar" id="c-bar" hidden></div>
+<div class="chart-box" data-pane="ct" data-key="candle" id="c-candle"></div>
+<p class="muted" style="font-size:14px">点数图参数：每格 <span data-v="box"></span> 美元，反转 3 格（高低点法），共 <span data-v="pnfCols"></span> 列。X 表示上涨，O 表示下跌。鼠标悬停可以看每列对应的日期，但图本身没有时间轴。</p>
+<table>
+  <tr><th>图表</th><th>画的是什么</th><th>优点</th><th>缺点 / 注意</th></tr>
+  <tr><td>线形图</td><td>只连接每天的<b>收盘价</b></td><td>最简洁；很多人认为收盘价是一天所有交易行为的总和</td><td>丢掉了盘中信息，比如盘中在哪里出现反转，而这些恰恰能说明支撑和阻力到底在哪里</td></tr>
+  <tr><td>点数图</td><td>用 X、O 列记录价格变动，基于<b>高点和低点</b>，不是收盘价</td><td>更清楚地表现支撑位和阻力位，便于画趋势线</td><td>①没有时间属性；②不体现成交量。日本的类似图表在第 9–11 章讲</td></tr>
+  <tr><td>条形图</td><td>每天一根竖线：顶是最高价、底是最低价，<b>左横杠是开盘价，右横杠是收盘价</b></td><td>长期的行业标准；信息比前两种多，可以配成交量</td><td>开盘价和收盘价谁高谁低，要盯着两个小横杠才看得出</td></tr>
+  <tr><td>蜡烛图</td><td>和条形图<b>数据完全一样</b>（开高低收），但开盘价与收盘价之间画成「实体」并上色</td><td>一眼看出当天是买方赢还是卖方赢，形态容易识别</td><td>本身只反映短期现象，需要结合趋势、成交量等（第 5–8 章）</td></tr>
+</table>
+<div class="tip-box">动手试一下：在「③ 条形图」和「④ 蜡烛图」之间来回切换，找到最后一根。条形图里你得先找左右两个小横杠；蜡烛图里看实体就知道了。这就是「更容易、更迅速地解读市场」。</div>
+
+<h2>1.7　蜡烛图的优势<span class="page">p.13–16，图 1-7</span></h2>
+<p><b>（1）提示市场心理的变化。</b>蜡烛图反映的虽然是短期现象，但它能提醒你注意可能引发<b>趋势反转</b>的心理变化。</p>
+<p><b>（2）更容易、更迅速地解读市场。</b>阴烛多还是阳烛多，能帮你快速判断目前偏积累还是偏分发；上涨日和下跌日颜色不同，反转和持续形态也更容易认出来。</p>
+<div class="practice"><h4>🔍 数一数最近的阴阳烛</h4>
+<table>
+  <tr><th>区间</th><th>阳烛</th><th>阴烛</th><th>阳烛日成交量</th><th>阴烛日成交量</th></tr>
+  <tr><td>最近 20 天（<span data-v="t20start"></span> 起）</td><td class="num" data-v="t20w"></td><td class="num" data-v="t20b"></td><td class="num" data-v="t20wv"></td><td class="num" data-v="t20bv"></td></tr>
+  <tr><td>最近 60 天（<span data-v="t60start"></span> 起）</td><td class="num" data-v="t60w"></td><td class="num" data-v="t60b"></td><td class="num" data-v="t60wv"></td><td class="num" data-v="t60bv"></td></tr>
+</table>
+<p data-h="tally"></p></div>
+<p><b>（3）具体形态揭示市场心理。</b>例如十字星（开盘价和收盘价几乎相同）出现在<b>低点</b>，后面跟一根长阳烛，说明情绪在转变，价格有望上涨；出现在<b>高点</b>，后面跟一根长阴烛，价格可能下跌。这些形态在第 3、4 章详细讲。今天只要记住：<b>同一个形态，出现在高位还是低位，意思可能完全相反。</b></p>
+
+<h2>🎯 今日实战：用第 1 章的知识读 <span data-v="label"></span> 最近 60 天</h2>
+<div class="chart-box" id="c-sixty"></div>
+<p class="muted" style="font-size:14px">图中「今」= 你选的那一天；「1」= 练习题第 1 题用到的那根蜡烛；虚线 = 一年前的高点。鼠标悬停看每根的数值。</p>
+<div class="practice">
+<h4>按顺序回答（答案就在本页上面）</h4>
+<ol data-h="steps"></ol>
+<p data-h="conclusion"></p>
+</div>
+
+<h2>✍️ 练习题</h2>
+<div id="quiz"></div>
+<span id="score"></span>
+
+<h2>📌 本章小结</h2>
+<div class="book">要点回顾：价格波动来自交易者行为对供需的改变，蜡烛图的核心用途是读出这些行为背后的心理与情绪。它源自日本，讲究谋划与纪律；和西方技术分析结合使用效果更好，这是第 5–8 章的主题。</div>
+<div class="terms">
+  <div><b>阳烛（白/空心）</b>收盘价 &gt; 开盘价</div>
+  <div><b>阴烛（黑/实心）</b>收盘价 &lt; 开盘价</div>
+  <div><b>实体</b>开盘价与收盘价之间的部分</div>
+  <div><b>上/下影线</b>实体到最高价/最低价的细线</div>
+  <div><b>跳空</b>开盘价与前一天收盘价之间的空隙，不在实体里</div>
+  <div><b>成交量</b>一段时间内转手的股数，衡量价格变动的有效度</div>
+  <div><b>积累 / 分发</b>高低点持续抬高 / 持续降低</div>
+  <div><b>四种图</b>线形图 · 点数图 · 条形图 · 蜡烛图</div>
+</div>
+
+<h2>➡️ 下一章：第 2 章　蜡烛图的构成和分析<span class="page">p.17–26</span></h2>
+<p>蜡烛图和条形图用的是同一组数据，第 2 章重点讲<b>基本的蜡烛线</b>：长短实体、影线长短分别意味着什么。</p>
+
+<p class="disclaimer">本页是个人学习笔记，书中内容为概括转述，请以原书为准。行情数据来自 Yahoo Finance（每个交易日收盘后自动更新），可能有延迟或误差。所有分析只用于练习读图，不构成投资建议。</p>
+</main>
+<script>
+window.DYNAMIC = true;
+// 轻量 SVG 图表：蜡烛图 / 条形图(OHLC) / 线形图 / 点数图，带成交量与悬停提示。
+// 不依赖任何外部库，离线可用。各章节共用。
+
+const SCHEMES = {
+  book: { name: "书中样式（空心阳烛 / 实心阴烛）", up: "#ffffff", upStroke: "#1f2328", down: "#1f2328", downStroke: "#1f2328", line: "#1f2328" },
+  us:   { name: "美股软件（绿涨红跌）", up: "#1a9e5c", upStroke: "#1a9e5c", down: "#d1453b", downStroke: "#d1453b", line: "#2563eb" },
+  cn:   { name: "国内软件（红涨绿跌）", up: "#d1453b", upStroke: "#d1453b", down: "#1a9e5c", downStroke: "#1a9e5c", line: "#2563eb" },
+};
+let scheme = localStorage.getItem("cs-scheme") || "book";
+const charts = new Map();   // 容器 id → 图表；同一容器重画时替换，不会叠加
+
+// 页面重画（看盘页每 2 分钟一次、切换筛选）后，旧卡片的图表记录会留在 Map 里：定期删掉已经不在页面上的
+function pruneCharts() {
+  if (charts.size < 40) return;
+  for (const id of [...charts.keys()]) if (id.startsWith("c-") || id.startsWith("anatomy")) { if (!document.getElementById(id)) charts.delete(id); }
+}
+
+function setScheme(s) {
+  scheme = s;
+  localStorage.setItem("cs-scheme", s);
+  document.querySelectorAll("[data-scheme-btn]").forEach(b => b.classList.toggle("on", b.dataset.schemeBtn === s));
+  charts.forEach(c => c.draw());
+}
+
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs, parent) {
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(e);
+  return e;
+}
+const fmt = n => n.toFixed(2);
+const fmtVol = v => (v / 1e6).toFixed(1) + "M";
+
+function tooltip(box) {
+  let t = box.querySelector(".tip");
+  if (!t) { t = document.createElement("div"); t.className = "tip"; box.appendChild(t); }
+  return t;
+}
+
+// opts: {type:'candle'|'bar'|'line', rows, volume:bool, height, marks:{date:label}, lines:[{y,label,color}]}
+function priceChart(container, opts) {
+  const box = typeof container === "string" ? document.getElementById(container) : container;
+  const chart = { draw };
+  pruneCharts();
+  charts.set(box.id, chart);
+
+  function draw() {
+    const S = SCHEMES[scheme];
+    box.querySelectorAll("svg").forEach(s => s.remove());
+    const rows = opts.rows;
+    const W = 900, H = opts.height || 380;
+    const padL = 8, padR = 58, padT = 14;
+    const volH = opts.volume ? 70 : 0;
+    const priceH = H - padT - volH - 26 - (opts.power ? 16 : 0);   // 多空力量条单独占一条，不压在 K 线上
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart" }, null);
+    box.prepend(svg);
+
+    const lo = Math.min(...rows.map(r => opts.type === "line" ? r.c : r.l));
+    const hi = Math.max(...rows.map(r => opts.type === "line" ? r.c : r.h));
+    const pad = (hi - lo) * 0.06;
+    const yMin = lo - pad, yMax = hi + pad;
+    const y = p => padT + (yMax - p) / (yMax - yMin) * priceH;
+    const step = (W - padL - padR) / rows.length;
+    const x = i => padL + step * (i + 0.5);
+    const bw = Math.max(1.5, step * 0.62);
+
+    // 网格 + 价格刻度
+    for (let k = 0; k <= 4; k++) {
+      const p = yMin + (yMax - yMin) * k / 4;
+      el("line", { x1: padL, x2: W - padR, y1: y(p), y2: y(p), class: "grid" }, svg);
+      el("text", { x: W - padR + 6, y: y(p) + 4, class: "axis" }, svg).textContent = p.toFixed(0);
+    }
+    // 横轴刻度：日线按月份；盘中图（opts.intraday）按整点，开盘那根标 9:30
+    let lastM = "";
+    rows.forEach((r, i) => {
+      const m = opts.intraday ? r.time.slice(0, 2) : r.date.slice(0, 7);   // 盘中：同一个小时只标一次（开盘那小时标 9:30）
+      if (m !== lastM) {
+        lastM = m;
+        el("line", { x1: x(i), x2: x(i), y1: padT, y2: H - 20, class: "grid faint" }, svg);
+        el("text", { x: x(i) + 3, y: H - 6, class: "axis" }, svg).textContent = opts.intraday ? (i === 0 ? r.time : r.time.slice(0, 2) + ":00") : +r.date.slice(5, 7) + "月";
+      }
+    });
+
+    const usedY = [];                       // 横条标签：离得太近就往下错开，避免叠字
+    (opts.bands || []).slice().sort((a, b) => b.hi - a.hi).forEach(B => {   // 价格区间（支撑 / 阻力区）：半透明横条
+      const t = y(Math.min(B.hi, yMax)), b = y(Math.max(B.lo, yMin));
+      if (b <= padT || t >= padT + priceH) return;
+      if (B.line) {   // 线型（成本线、确认线）：虚线，和色带区分
+        const yy = y((B.lo + B.hi) / 2);
+        el("line", { x1: padL, x2: W - padR, y1: yy, y2: yy, stroke: B.color, "stroke-width": B.width || 2, "stroke-dasharray": B.dash || "7 4" }, svg);
+      } else {
+        el("rect", { x: padL, y: t, width: W - padL - padR, height: Math.max(3, b - t), fill: B.color, opacity: B.opacity || 0.16 }, svg);
+      }
+      if (B.axis) {   // 右侧价格轴上的彩色价签（TradingView 式），互相错开
+        let ay = y((B.lo + B.hi) / 2);
+        while (usedY.some(u => Math.abs(u - ay) < 15)) ay += 15;
+        usedY.push(ay);
+        el("rect", { x: W - padR + 2, y: ay - 7, width: padR - 4, height: 14, rx: 3, fill: B.color }, svg);
+        el("text", { x: W - padR + padR / 2, y: ay + 4, class: "axis-tag" }, svg).textContent = B.axis;
+        return;
+      }
+      let ly = t - 3;
+      while (usedY.some(u => Math.abs(u - ly) < 12)) ly += 12;
+      usedY.push(ly);
+      el("text", { x: padL + 4, y: ly, class: "axis band-l", fill: B.color }, svg).textContent = B.label;
+    });
+    // 均线、趋势线只画在价格区域内（超出价格范围的部分裁掉，不压到成交量上）
+    const clipId = "clip-" + box.id;
+    const cp = el("clipPath", { id: clipId }, el("defs", {}, svg));
+    el("rect", { x: padL, y: padT, width: W - padL - padR, height: priceH }, cp);
+    (opts.overlays || []).forEach(O => {   // 叠加折线（均线）：values 与 rows 一一对应，null 跳过
+      let d = "";
+      O.values.forEach((v, j) => { if (v === null) return; d += (d ? "L" : "M") + x(j).toFixed(1) + " " + y(v).toFixed(1); });
+      el("path", { d, fill: "none", stroke: O.color, "stroke-width": 1.4, opacity: 0.9, "clip-path": `url(#${clipId})` }, svg);
+    });
+    (opts.segments || []).forEach(G => {   // 线段（趋势线）：x 为 rows 下标，可超出范围（延伸）
+      el("line", { x1: x(G.i1), y1: y(G.p1), x2: x(G.i2), y2: y(G.p2), stroke: G.color, "stroke-width": 1.6, "stroke-dasharray": G.dash || "", "clip-path": `url(#${clipId})` }, svg);
+    });
+    const lineY = [];                      // 价位线标签：太近就往下错开
+    (opts.lines || []).slice().sort((a, b) => b.y - a.y).forEach(L => {
+      el("line", { x1: padL, x2: W - padR, y1: y(L.y), y2: y(L.y), stroke: L.color || "#c2410c", "stroke-dasharray": "5 4", "stroke-width": 1.2 }, svg);
+      let ly = y(L.y) - 4;
+      while (lineY.some(u => Math.abs(u - ly) < 12)) ly += 12;
+      lineY.push(ly);
+      el("text", { x: padL + 4, y: ly, class: "axis band-l", fill: L.color || "#c2410c" }, svg).textContent = L.label;
+    });
+
+    if (opts.type === "line") {
+      const d = rows.map((r, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(r.c).toFixed(1)).join(" ");
+      el("path", { d, fill: "none", stroke: S.line, "stroke-width": 1.8 }, svg);
+    }
+
+    const vMax = Math.max(...rows.map(r => r.v));
+    rows.forEach((r, i) => {
+      const up = r.c >= r.o;
+      const g = el("g", {}, svg);
+      if (opts.type === "candle") {
+        el("line", { x1: x(i), x2: x(i), y1: y(r.h), y2: y(r.l), stroke: up ? S.upStroke : S.downStroke, "stroke-width": 1 }, g);
+        const top = y(Math.max(r.o, r.c)), bot = y(Math.min(r.o, r.c));
+        el("rect", { x: x(i) - bw / 2, y: top, width: bw, height: Math.max(1, bot - top),
+                     fill: up ? S.up : S.down, stroke: up ? S.upStroke : S.downStroke, "stroke-width": 1 }, g);
+      } else if (opts.type === "bar") {
+        const c = up ? S.upStroke : S.downStroke;
+        el("line", { x1: x(i), x2: x(i), y1: y(r.h), y2: y(r.l), stroke: c, "stroke-width": 1.2 }, g);
+        el("line", { x1: x(i) - bw / 2, x2: x(i), y1: y(r.o), y2: y(r.o), stroke: c, "stroke-width": 1.2 }, g);
+        el("line", { x1: x(i), x2: x(i) + bw / 2, y1: y(r.c), y2: y(r.c), stroke: c, "stroke-width": 1.2 }, g);
+      }
+      if (opts.volume) {
+        const vh = r.v / vMax * (volH - 8);
+        el("rect", { x: x(i) - bw / 2, y: H - 22 - vh, width: bw, height: vh,
+                     fill: opts.type === "line" ? "#9aa4b2" : (up ? S.upStroke : S.downStroke), opacity: 0.45 }, g);
+      }
+      if (opts.labels && opts.labels[r.date]) {   // 小标签：字符串 = 蜡烛下方；{text, dir} = 看涨在下方（蓝）、看跌在上方（橙）
+        const L = opts.labels[r.date], t = typeof L === "string" ? { text: L, dir: 0 } : L;
+        const above = t.dir < 0;
+        if (t.shape === "diamond") {             // 小空心菱形（不写字，悬停提示里有说明）
+          const cy = above ? y(r.h) - 7 : y(r.l) + 7;
+          el("path", { d: `M${x(i)} ${cy - 4}l4 4l-4 4l-4 -4z`, fill: "#fff", stroke: "#6b7280", "stroke-width": 1.3 }, svg);
+        } else {
+          el("text", { x: t.left ? x(i) - 9 : x(i), y: t.left ? y(above ? r.h : r.l) + 4 : above ? Math.max(y(r.h) - 5, 10) : Math.min(y(r.l) + 13, padT + priceH + 10),
+                       "text-anchor": t.left ? "end" : "middle",
+                       class: "clabel" + (t.cls ? " " + t.cls : t.dir > 0 ? " bull" : t.dir < 0 ? " bear" : "") }, svg).textContent = t.text;
+        }
+      }
+      // 自己的成交：圆形徽章「买 / 卖」（绿 / 粉紫），圆心在成交价，旁边短横线标出精确价位；
+      // 刻意和拐点的「▲底 / ▼顶」文字（蓝 / 橙）在形状和颜色上都区分开。同一天多笔左右错开
+      (opts.optMarks && opts.optMarks[r.date] || []).forEach((O, n) => {   // 期权开仓：K 线下方的小方块 C / P
+        const oy = Math.min(y(r.l) + 16 + n * 14, padT + priceH - 2), c = O.cp === "C" ? "#4f46e5" : "#b45309";
+        el("rect", { x: x(i) - 6, y: oy - 6, width: 12, height: 12, rx: 2, fill: c, opacity: 0.9 }, svg);
+        el("text", { x: x(i), y: oy + 3.5, class: "tradet" }, svg).textContent = O.cp;
+      });
+      (opts.points && opts.points[r.date] || []).forEach((P, n, arr) => {
+        const py = y(P.price), buy = P.dir > 0, c = buy ? "#059669" : "#c026d3", dx = (n - (arr.length - 1) / 2) * 15;
+        el("line", { x1: x(i) + dx - 9, x2: x(i) + dx + 9, y1: py, y2: py, stroke: c, "stroke-width": 1.5 }, svg);
+        el("circle", { cx: x(i) + dx, cy: py, r: 7.5, fill: c, stroke: "#fff", "stroke-width": 1.5 }, svg);
+        el("text", { x: x(i) + dx, y: py + 3.6, class: "tradet" }, svg).textContent = buy ? "买" : "卖";
+      });
+      if (opts.marks && opts.marks[r.date]) {
+        el("circle", { cx: x(i), cy: y(r.h) - 12, r: 9, class: "mark" }, svg);
+        el("text", { x: x(i), y: y(r.h) - 8, class: "markt" }, svg).textContent = opts.marks[r.date];
+      }
+      // 悬停热区
+      const hit = el("rect", { x: x(i) - step / 2, y: 0, width: step, height: H, fill: "transparent" }, svg);
+      hit.addEventListener("mousemove", ev => {
+        const t = tooltip(box);
+        const prev = rows[i - 1], ref = opts.intraday ? opts.refClose : prev && prev.c;
+        const chg = ref ? ((r.c / ref - 1) * 100).toFixed(2) + "%" : "—";
+        t.innerHTML = `<b>${opts.intraday ? `美东 ${r.time} · 这 5 分钟` : r.date}</b><br>开 ${fmt(r.o)}　高 ${fmt(r.h)}<br>低 ${fmt(r.l)}　收 ${fmt(r.c)}<br>` +
+          `${opts.intraday ? "较昨收" : "较前收"} ${chg}　量 ${fmtVol(r.v)}<br><span class="${up ? "u" : "d"}">${up ? "阳烛：收盘 ≥ 开盘" : "阴烛：收盘 < 开盘"}</span>` +
+          (opts.labels && opts.labels[r.date] && opts.labels[r.date].tip ? `<br>${opts.labels[r.date].tip}` : "") +
+          (opts.optMarks && opts.optMarks[r.date] ? opts.optMarks[r.date].map(O => `<br>期权：${O.text}`).join("") : "");
+        const rect = box.getBoundingClientRect();
+        t.style.left = Math.min(ev.clientX - rect.left + 14, rect.width - 190) + "px";
+        t.style.top = (ev.clientY - rect.top + 10) + "px";
+        t.style.display = "block";
+      });
+      hit.addEventListener("mouseleave", () => tooltip(box).style.display = "none");
+      hit.addEventListener("click", () => window.csSelectCandle && window.csSelectCandle(r));
+      hit.style.cursor = "pointer";
+    });
+    if (opts.volume) el("text", { x: padL + 4, y: H - 22 - volH + 14, class: "axis" }, svg).textContent = "成交量";
+    if (opts.power) {   // 多空力量条：每天一格，收盘在全天区间的位置（+1 蓝 = 买方控制到收盘，−1 橙 = 卖方），颜色越深越彻底
+      const py = padT + priceH + 6;
+      rows.forEach((r, i) => {
+        const v = r.h > r.l ? ((r.c - r.l) - (r.h - r.c)) / (r.h - r.l) : 0;
+        el("rect", { x: x(i) - step / 2 + 0.5, y: py, width: Math.max(1, step - 1), height: 8, fill: v >= 0 ? "#2a78d6" : "#eb6834", opacity: 0.12 + 0.88 * Math.abs(v) }, svg);
+      });
+      el("text", { x: W - padR + 6, y: py + 8, class: "axis" }, svg).textContent = "多空";
+    }
+  }
+  draw();
+  return chart;
+}
+
+// 指标副图：与 priceChart 同样的左右留白和每根宽度，竖直方向对齐上面的 K 线图。
+// opts: {rows, height, series:[{values, color, type:'line'|'bar'}], levels:[{y, label}], yMin, yMax, title}
+function indicatorChart(container, opts) {
+  const box = document.getElementById(container);
+  const chart = { draw };
+  charts.set(box.id, chart);
+  function draw() {
+    box.querySelectorAll("svg").forEach(s => s.remove());
+    const W = 900, H = opts.height || 140, padL = 8, padR = 58, padT = 8, padB = 8, rows = opts.rows;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart" }, null);
+    box.prepend(svg);
+    const vals = opts.series.flatMap(s => s.values.filter(v => v !== null));
+    const lo = opts.yMin ?? Math.min(0, ...vals), hi = opts.yMax ?? Math.max(...vals);
+    const y = v => padT + (hi - v) / ((hi - lo) || 1) * (H - padT - padB);
+    const step = (W - padL - padR) / rows.length, x = i => padL + step * (i + 0.5);
+    (opts.levels || []).forEach(L => {
+      el("line", { x1: padL, x2: W - padR, y1: y(L.y), y2: y(L.y), class: "grid", "stroke-dasharray": "4 3" }, svg);
+      el("text", { x: W - padR + 6, y: y(L.y) + 4, class: "axis" }, svg).textContent = L.label ?? L.y;
+    });
+    if (opts.title) el("text", { x: padL + 4, y: padT + 11, class: "axis" }, svg).textContent = opts.title;
+    opts.series.forEach(S => {
+      if (S.type === "bar") {
+        S.values.forEach((v, i) => { if (v === null) return; el("rect", { x: x(i) - step * 0.35, y: Math.min(y(v), y(0)), width: step * 0.7, height: Math.abs(y(v) - y(0)), fill: S.colors ? S.colors[i] : v >= 0 ? "#16a34a" : "#dc2626", opacity: 0.55 }, svg); });
+      } else {
+        let d = ""; S.values.forEach((v, i) => { if (v === null) return; d += (d ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1); });
+        el("path", { d, fill: "none", stroke: S.color, "stroke-width": 1.5 }, svg);
+      }
+    });
+    (opts.marks || []).forEach(m => {   // {i, v, text, dir}
+      el("text", { x: x(m.i), y: y(m.v) + (m.dir > 0 ? 14 : -6), class: "clabel " + (m.dir > 0 ? "bull" : "bear") }, svg).textContent = m.text;
+    });
+  }
+  draw();
+}
+
+// 新三价线 / 砖形图 / 折线图：没有时间轴，一列是一根线 / 一块砖 / 一段。
+// opts: {type:'tlb'|'renko'|'kagi', items, rows（用于悬停显示日期）, levels:[{y,label,color}]}
+function altChart(container, opts) {
+  const box = document.getElementById(container);
+  const chart = { draw };
+  charts.set(box.id, chart);
+  function draw() {
+    const S = SCHEMES[scheme];
+    box.querySelectorAll("svg").forEach(s => s.remove());
+    const items = opts.items, n = items.length, W = 900, H = opts.height || 380, padL = 8, padR = 58, padT = 14, padB = 14;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart" }, null);
+    box.prepend(svg);
+    const vals = opts.type === "kagi" ? items.flatMap(s => [s.start, s.end]) : items.flatMap(b => [b.lo, b.hi]);
+    (opts.levels || []).forEach(L => vals.push(L.y));
+    const lo = Math.min(...vals), hi = Math.max(...vals), pad = (hi - lo) * 0.05;
+    const y = v => padT + (hi + pad - v) / ((hi - lo) + 2 * pad || 1) * (H - padT - padB);
+    const cw = Math.min(30, (W - padL - padR) / Math.max(n, 1)), x = j => padL + cw * (j + 0.5);
+    for (let k = 0; k <= 4; k++) {
+      const v = lo - pad + (hi - lo + 2 * pad) * k / 4;
+      el("line", { x1: padL, x2: W - padR, y1: y(v), y2: y(v), class: "grid" }, svg);
+      el("text", { x: W - padR + 6, y: y(v) + 4, class: "axis" }, svg).textContent = v.toFixed(v < 20 ? 2 : 0);
+    }
+    (opts.levels || []).forEach(L => {
+      el("line", { x1: padL, x2: W - padR, y1: y(L.y), y2: y(L.y), stroke: L.color, "stroke-dasharray": "5 4", "stroke-width": 1.2 }, svg);
+      el("text", { x: padL + 4, y: y(L.y) - 4, class: "axis", fill: L.color }, svg).textContent = L.label;
+    });
+    const tip = (j, html) => {
+      const hit = el("rect", { x: x(j) - cw / 2, y: 0, width: cw, height: H, fill: "transparent" }, svg);
+      hit.addEventListener("mousemove", ev => { const t = tooltip(box); t.innerHTML = html; const r = box.getBoundingClientRect();
+        t.style.left = Math.min(ev.clientX - r.left + 14, r.width - 200) + "px"; t.style.top = (ev.clientY - r.top + 10) + "px"; t.style.display = "block"; });
+      hit.addEventListener("mouseleave", () => tooltip(box).style.display = "none");
+    };
+    if (opts.type === "kagi") {
+      items.forEach((s, j) => {
+        // 一段竖线可能在中途变粗 / 变细：按 flips 切开
+        const pts = [s.start, ...(s.flips || []).map(f => f.p), s.end];
+        let th = s.thickStart;
+        for (let q = 0; q < pts.length - 1; q++) {
+          el("line", { x1: x(j), x2: x(j), y1: y(pts[q]), y2: y(pts[q + 1]), stroke: th ? S.upStroke : S.downStroke, "stroke-width": th ? 4 : 1.4 }, svg);
+          if (s.flips && s.flips[q]) th = s.flips[q].thick;
+        }
+        if (j + 1 < n) el("line", { x1: x(j), x2: x(j + 1), y1: y(s.end), y2: y(s.end), stroke: s.thickEnd ? S.upStroke : S.downStroke, "stroke-width": s.thickEnd ? 4 : 1.4 }, svg);
+        tip(j, `<b>第 ${j + 1} 段：${s.up ? "上行" : "下行"}</b><br>${s.start.toFixed(2)} → ${s.end.toFixed(2)}<br>${opts.rows[s.k0].date} ~ ${opts.rows[s.k].date}<br>${s.thickEnd ? "粗线（阳）" : "细线（阴）"}${s.flips && s.flips.length ? "，本段内变" + (s.thickEnd ? "粗" : "细") : ""}`);
+      });
+    } else {
+      items.forEach((b, j) => {
+        el("rect", { x: x(j) - cw * 0.42, y: y(b.hi), width: cw * 0.84, height: Math.max(1.5, y(b.lo) - y(b.hi)),
+          fill: b.up ? S.up : S.down, stroke: b.up ? S.upStroke : S.downStroke, "stroke-width": 1.2 }, svg);
+        if (b.turn) el("text", { x: x(j), y: b.up ? y(b.lo) + 12 : y(b.hi) - 4, class: "clabel " + (b.up ? "bull" : "bear") }, svg).textContent = b.up ? "买" : "卖";
+        tip(j, `<b>第 ${j + 1} ${opts.type === "tlb" ? "根线" : "块砖"}：${b.up ? "上涨" : "下跌"}</b><br>${b.lo.toFixed(2)} – ${b.hi.toFixed(2)}<br>画出日期：${b.date}${b.turn ? "<br>⚑ 转向" : ""}`);
+      });
+    }
+  }
+  draw();
+}
+
+// 点数图：cols = [{type, top, bottom, start, end}], box = 格子大小
+function pnfChart(container, cols, boxSize) {
+  const box = document.getElementById(container);
+  box.querySelectorAll("svg").forEach(s => s.remove());
+  const lo = Math.min(...cols.map(c => c.bottom)), hi = Math.max(...cols.map(c => c.top));
+  const n = Math.round((hi - lo) / boxSize) + 1;
+  const cell = 15, padL = 8, padR = 58, padT = 10;
+  const W = Math.max(900, padL + padR + cols.length * cell), H = padT * 2 + n * cell + 20;
+  const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart" }, null);
+  box.prepend(svg);
+  const y = p => padT + (hi - p) / boxSize * cell;
+  for (let k = 0; k < n; k += 4) {
+    const p = hi - k * boxSize;
+    el("line", { x1: padL, x2: W - padR, y1: y(p) + cell / 2, y2: y(p) + cell / 2, class: "grid" }, svg);
+    el("text", { x: W - padR + 6, y: y(p) + cell / 2 + 4, class: "axis" }, svg).textContent = p.toFixed(0);
+  }
+  cols.forEach((c, i) => {
+    const cx = padL + i * cell + cell / 2;
+    for (let p = c.bottom; p <= c.top + 1e-9; p += boxSize) {
+      const cy = y(p) + cell / 2;
+      if (c.type === "X") {
+        el("path", { d: `M${cx - 5} ${cy - 5}L${cx + 5} ${cy + 5}M${cx + 5} ${cy - 5}L${cx - 5} ${cy + 5}`, stroke: "#1a9e5c", "stroke-width": 1.6 }, svg);
+      } else {
+        el("circle", { cx, cy, r: 5, fill: "none", stroke: "#d1453b", "stroke-width": 1.6 }, svg);
+      }
+    }
+    const hit = el("rect", { x: cx - cell / 2, y: 0, width: cell, height: H, fill: "transparent" }, svg);
+    hit.addEventListener("mousemove", ev => {
+      const t = tooltip(box);
+      t.innerHTML = `<b>第 ${i + 1} 列：${c.type === "X" ? "X（上涨）" : "O（下跌）"}</b><br>${c.bottom.toFixed(0)} → ${c.top.toFixed(0)}<br>${c.start} ~ ${c.end}<br><span class="muted">注意：点数图本身不显示日期，这里是额外标注</span>`;
+      const rect = box.getBoundingClientRect();
+      t.style.left = Math.min(ev.clientX - rect.left + 14, rect.width - 200) + "px";
+      t.style.top = (ev.clientY - rect.top + 10) + "px";
+      t.style.display = "block";
+    });
+    hit.addEventListener("mouseleave", () => tooltip(box).style.display = "none");
+  });
+}
+
+// 迷你蜡烛 / 条形（返回 SVG 字符串，用于图鉴卡片和练习题；按自身最高最低缩放）
+function miniCandle(r, w = 44, h = 74) {
+  const S = SCHEMES[scheme], up = r.c >= r.o, pad = 4, R = (r.h - r.l) || 1;
+  const y = p => pad + (r.h - p) / R * (h - 2 * pad), cx = w / 2;
+  const top = y(Math.max(r.o, r.c)), bot = y(Math.min(r.o, r.c));
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" class="mini"><line x1="${cx}" x2="${cx}" y1="${y(r.h)}" y2="${y(r.l)}" stroke="${up ? S.upStroke : S.downStroke}" stroke-width="1.5"/>` +
+    `<rect x="${cx - w * 0.22}" y="${top}" width="${w * 0.44}" height="${Math.max(1.5, bot - top)}" fill="${up ? S.up : S.down}" stroke="${up ? S.upStroke : S.downStroke}" stroke-width="1.5"/></svg>`;
+}
+// 一组蜡烛（共用同一价格刻度），用于形态示意图和真实例子；hi = 要高亮的下标集合
+function miniGroup(rows, opts = {}) {
+  const S = SCHEMES[scheme], cw = opts.cw || 16, h = opts.h || 80, pad = 5, hi = opts.hi || new Set();
+  const top = Math.max(...rows.map(r => r.h)), bot = Math.min(...rows.map(r => r.l)), R = (top - bot) || 1;
+  const y = p => pad + (top - p) / R * (h - 2 * pad), w = cw * rows.length + 4;
+  let g = "";
+  rows.forEach((r, j) => {
+    const up = r.c >= r.o, cx = 2 + cw * j + cw / 2, st = up ? S.upStroke : S.downStroke, t = y(Math.max(r.o, r.c)), b = y(Math.min(r.o, r.c));
+    if (hi.has(j)) g += `<rect x="${cx - cw / 2}" y="0" width="${cw}" height="${h}" fill="#fde68a" opacity=".45"/>`;
+    g += `<line x1="${cx}" x2="${cx}" y1="${y(r.h)}" y2="${y(r.l)}" stroke="${st}" stroke-width="1.3"/>` +
+         `<rect x="${cx - cw * 0.3}" y="${t}" width="${cw * 0.6}" height="${Math.max(1.2, b - t)}" fill="${up ? S.up : S.down}" stroke="${st}" stroke-width="1.2"/>`;
+  });
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" class="mini">${g}</svg>`;
+}
+function miniBar(r, w = 44, h = 74) {
+  const S = SCHEMES[scheme], up = r.c >= r.o, pad = 4, R = (r.h - r.l) || 1, c = up ? S.upStroke : S.downStroke;
+  const y = p => pad + (r.h - p) / R * (h - 2 * pad), cx = w / 2;
+  return `<svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" class="mini"><g stroke="${c}" stroke-width="1.8"><line x1="${cx}" x2="${cx}" y1="${y(r.h)}" y2="${y(r.l)}"/>` +
+    `<line x1="${cx - 10}" x2="${cx}" y1="${y(r.o)}" y2="${y(r.o)}"/><line x1="${cx}" x2="${cx + 10}" y1="${y(r.c)}" y2="${y(r.c)}"/></g></svg>`;
+}
+
+// 单根蜡烛解剖图
+function anatomy(container, r) {
+  const box = document.getElementById(container);
+  const draw = () => {
+    const S = SCHEMES[scheme];
+    box.querySelectorAll("svg").forEach(s => s.remove());
+    const W = 420, H = 300, pad = 30;
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, class: "chart small" }, null);
+    box.prepend(svg);
+    const y = p => pad + (r.h - p) / (r.h - r.l) * (H - 2 * pad);
+    const up = r.c >= r.o, cx = 120;
+    el("line", { x1: cx, x2: cx, y1: y(r.h), y2: y(r.l), stroke: up ? S.upStroke : S.downStroke, "stroke-width": 2 }, svg);
+    const top = y(Math.max(r.o, r.c)), bot = y(Math.min(r.o, r.c));
+    el("rect", { x: cx - 28, y: top, width: 56, height: Math.max(2, bot - top), fill: up ? S.up : S.down, stroke: up ? S.upStroke : S.downStroke, "stroke-width": 2 }, svg);
+    const label = (p, txt) => {
+      el("line", { x1: cx + 34, x2: 200, y1: y(p), y2: y(p), stroke: "#8b949e", "stroke-dasharray": "3 3" }, svg);
+      el("text", { x: 206, y: y(p) + 5, class: "lbl" }, svg).textContent = txt;
+    };
+    label(r.h, `最高价 ${fmt(r.h)}`);
+    label(up ? r.c : r.o, (up ? "收盘价 " + fmt(r.c) : "开盘价 " + fmt(r.o)));
+    label(up ? r.o : r.c, (up ? "开盘价 " + fmt(r.o) : "收盘价 " + fmt(r.c)));
+    label(r.l, `最低价 ${fmt(r.l)}`);
+    el("text", { x: 20, y: (y(r.h) + top) / 2 + 4, class: "lbl muted" }, svg).textContent = "上影线";
+    el("text", { x: 20, y: (top + bot) / 2 + 4, class: "lbl muted" }, svg).textContent = "实体";
+    el("text", { x: 20, y: (bot + y(r.l)) / 2 + 4, class: "lbl muted" }, svg).textContent = "下影线";
+  };
+  charts.set(container, { draw });
+  draw();
+}
+
+function quiz() {
+  const s0 = document.getElementById("score");
+  if (s0) s0.textContent = `已答 0 / ${document.querySelectorAll(".q").length}`;
+  document.querySelectorAll(".q").forEach(q => {
+    q.querySelectorAll("button.opt").forEach(b => b.addEventListener("click", () => {
+      if (q.classList.contains("done")) return;
+      q.classList.add("done");
+      b.dataset.chosen = "1";
+      b.classList.add(b.dataset.ok === "1" ? "right" : "wrong");
+      q.querySelector('button.opt[data-ok="1"]').classList.add("right");
+      q.querySelector(".exp").style.display = "block";
+      const s = document.getElementById("score");
+      if (s) {
+        const done = document.querySelectorAll(".q.done").length;
+        const correct = document.querySelectorAll('.q button[data-chosen="1"][data-ok="1"]').length;
+        s.textContent = `已答 ${done} / ${document.querySelectorAll(".q").length}，答对 ${correct}`;
+      }
+    }));
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.querySelectorAll("[data-scheme-btn]").forEach(b => b.addEventListener("click", () => setScheme(b.dataset.schemeBtn)));
+  setScheme(scheme);
+  document.querySelectorAll(".tabs").forEach(tabs => {
+    tabs.querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+      tabs.querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b));
+      const group = tabs.dataset.group;
+      document.querySelectorAll(`[data-pane="${group}"]`).forEach(p => p.hidden = p.dataset.key !== b.dataset.key);
+    }));
+  });
+  if (!window.DYNAMIC) quiz();   // 动态页面在渲染完题目后自己调用 quiz()
+});
+
+// 第 1 章的计算与文字生成：输入任意股票的日线和选定日期，输出页面上所有数字和按规则生成的点评。
+// 纯函数、不碰 DOM：浏览器里直接用；Node 里 require 后用来生成笔记（notes_ch01.js）。
+
+(function (root) {
+  const f2 = n => n.toFixed(2);
+  const sg = (n, d = 2) => (n >= 0 ? "+" : "") + n.toFixed(d);
+  const pct = (a, b) => (a / b - 1) * 100;
+
+  function toRows(raw) {
+    return raw.map(r => ({ date: r[0], o: r[1], h: r[2], l: r[3], c: r[4], v: r[5] }));
+  }
+
+  // 点数图格子：在整齐的格子大小里挑一个，让半年数据画出来大约 25 列（太少看不出东西，太多挤不下）
+  function niceBox(rows) {
+    const p = Math.pow(10, Math.floor(Math.log10(rows[rows.length - 1].c)) - 3);
+    const cands = [1, 2, 2.5, 5, 10, 20, 25, 50, 100, 200, 250, 500].map(m => m * p);
+    let best = cands[0], bestD = Infinity;
+    for (const b of cands) {
+      const d = Math.abs(pointAndFigure(rows, b).length - 25);
+      if (d < bestD) { best = b; bestD = d; }
+    }
+    return best;
+  }
+
+  function pointAndFigure(rows, box, reversal = 3) {
+    const cols = [];
+    let cur = null;
+    const fl = x => Math.floor(x / box + 1e-9) * box, ce = x => Math.ceil(x / box - 1e-9) * box;
+    for (const r of rows) {
+      const hi = fl(r.h), lo = ce(r.l);
+      if (!cur) { cur = { type: "X", top: hi, bottom: lo, start: r.date, end: r.date }; continue; }
+      if (cur.type === "X") {
+        if (hi > cur.top) { cur.top = hi; cur.end = r.date; }
+        else if (lo <= cur.top - reversal * box) { cols.push(cur); cur = { type: "O", top: cur.top - box, bottom: lo, start: r.date, end: r.date }; }
+      } else {
+        if (lo < cur.bottom) { cur.bottom = lo; cur.end = r.date; }
+        else if (hi >= cur.bottom + reversal * box) { cols.push(cur); cur = { type: "X", top: hi, bottom: cur.bottom + box, start: r.date, end: r.date }; }
+      }
+    }
+    cols.push(cur);
+    return cols;
+  }
+
+  const MIN_INDEX = 270;   // 需要约 13 个月的历史才能算月度表和「一年前」
+
+  function computeCh1(rows, i) {
+    const L = i, last = rows[L], prev = rows[L - 1];
+    const chg = k => pct(rows[k].c, rows[k - 1].c);
+    const v50 = rows.slice(L - 50, L).reduce((s, r) => s + r.v, 0) / 50;
+    const range = last.h - last.l;
+    const V = {
+      last, prev, v50, vratio: last.v / v50,
+      gap: last.o - prev.c, gapPct: pct(last.o, prev.c), dayChg: chg(L), bodyPct: pct(last.c, last.o),
+      up: last.c >= last.o, closePos: range > 0 ? (last.c - last.l) / range * 100 : 50,
+      smallBody: range > 0 && Math.abs(last.c - last.o) <= range * 0.1,
+    };
+    const yr = rows.slice(L - 251, L + 1);
+    V.hi52 = Math.max(...yr.map(r => r.h)); V.lo52 = Math.min(...yr.map(r => r.l));
+    V.yrStart = yr[0]; V.yrChg = pct(last.c, rows[L - 252].c);
+
+    // 月度高低点（原则 3）
+    const months = [];
+    for (const r of rows.slice(L - 269, L + 1)) {
+      const k = r.date.slice(0, 7), m = months[months.length - 1];
+      if (!m || m.k !== k) months.push({ k, h: r.h, l: r.l });
+      else { m.h = Math.max(m.h, r.h); m.l = Math.min(m.l, r.l); }
+    }
+    months.forEach((m, j) => {
+      if (!j) return;
+      m.hUp = m.h > months[j - 1].h; m.lUp = m.l > months[j - 1].l;
+      m.trend = m.hUp && m.lUp ? "up" : !m.hUp && !m.lUp ? "down" : "mixed";
+    });
+    months[months.length - 1].partial = true;
+    V.months = months;
+    // 找连续 ≥3 个月高低点同降 / 同升的区间
+    V.runs = [];
+    let s = 1;
+    for (let j = 2; j <= months.length; j++) {
+      if (j === months.length || months[j].trend !== months[s].trend) {
+        if (months[s].trend !== "mixed" && j - s >= 3) V.runs.push({ trend: months[s].trend, from: months[s].k, to: months[j - 1].k, n: j - s });
+        s = j;
+      }
+    }
+    V.lastMonth = months[months.length - 1];
+
+    // 阴阳烛统计（优势 2）
+    const tally = n => {
+      const seg = rows.slice(L - n + 1, L + 1);
+      const w = seg.filter(r => r.c >= r.o), b = seg.filter(r => r.c < r.o);
+      const body = seg.reduce((s, r) => s + (r.c - r.o), 0), total = seg[seg.length - 1].c - rows[L - n].c;
+      return { n, w: w.length, b: b.length, wv: w.reduce((s, r) => s + r.v, 0) / 1e6, bv: b.reduce((s, r) => s + r.v, 0) / 1e6,
+               body, total, gaps: total - body, start: seg[0].date };
+    };
+    V.t20 = tally(20); V.t60 = tally(60);
+
+    // 放量日（1.4）
+    const idx130 = Array.from({ length: 130 }, (_, k) => L - 129 + k);
+    V.topVol = idx130.slice().sort((a, b) => rows[b].v - rows[a].v).slice(0, 6).sort((a, b) => a - b)
+      .map(k => ({ date: rows[k].date, v: rows[k].v, ratio: rows[k].v / v50, chg: chg(k) }));
+    V.avgAbs = idx130.reduce((s, k) => s + Math.abs(chg(k)), 0) / 130;
+    V.topAbs = V.topVol.reduce((s, x) => s + Math.abs(x.chg), 0) / V.topVol.length;
+
+    // 一年前的高点 / 低点（原则 5）
+    const ago = rows.slice(L - 270, L - 200);
+    V.oldHigh = ago.reduce((a, r) => (r.h > a.h ? r : a));
+    V.oldLow = ago.reduce((a, r) => (r.l < a.l ? r : a));
+    V.oldHighDist = pct(last.c, V.oldHigh.h); V.oldLowDist = pct(last.c, V.oldLow.l);
+
+    // 近 20 天最大的跳空（原则 1）
+    V.bigGap = null;
+    for (let k = L; k > L - 20; k--) {
+      const g = pct(rows[k].o, rows[k - 1].c);
+      if (!V.bigGap || Math.abs(g) > Math.abs(V.bigGap.pct)) V.bigGap = { date: rows[k].date, pct: g, o: rows[k].o, pc: rows[k - 1].c };
+    }
+
+    // 教学例子：比前一天涨却是阴烛 / 比前一天跌却是阳烛
+    const find = test => { for (let k = L; k > L - 250; k--) if (test(rows[k], rows[k - 1])) return { ...rows[k], pc: rows[k - 1].c }; return null; };
+    V.blackUp = find((r, p) => r.c < r.o && r.c > p.c);
+    V.whiteDown = find((r, p) => r.c > r.o && r.c < p.c);
+
+    V.six = rows.slice(L - 129, L + 1);
+    V.sixty = rows.slice(L - 59, L + 1);
+    V.year = rows.slice(L - 269, L + 1);
+    V.box = niceBox(V.six);
+    V.pnf = pointAndFigure(V.six, V.box);
+    V.text = texts(V);
+    return V;
+  }
+
+  // ---------- 按规则生成的点评文字（HTML 片段） ----------
+  function texts(V) {
+    const { last, prev } = V, T = {};
+    const kind = V.up ? "阳烛（空心）" : "阴烛（实心）";
+    T.kind = kind;
+    T.anatomy = `收盘价 ${f2(last.c)} ${V.up ? "高于" : "低于"}开盘价 ${f2(last.o)}，所以是一根 <b>${kind}</b>：从开盘到收盘，${V.up ? "买方" : "卖方"}占了上风。` +
+      (V.smallBody ? `不过实体很小（不到当天波动范围的 10%），说明多空几乎打平，这类蜡烛第 2 章会细讲。` : "") +
+      `收盘价落在当天波动范围的 <b>${V.closePos.toFixed(0)}%</b> 位置（0% 是最低价，100% 是最高价），` +
+      (V.closePos >= 70 ? "说明买方一直强到收盘。" : V.closePos <= 30 ? "说明卖方一直压到收盘。" : "说明收盘时多空还在拉锯。");
+    T.hiNote = last.h >= V.hi52 ? "这正是过去 52 周的最高价" : last.l <= V.lo52 ? "最低价是过去 52 周的最低价" : `过去 52 周区间 ${f2(V.lo52)}–${f2(V.hi52)}`;
+
+    const g = V.bigGap;
+    T.p1 = Math.abs(V.gapPct) >= 1
+      ? `${prev.date} 收盘 ${f2(prev.c)}，${last.date} 开盘直接到了 ${f2(last.o)}，<b>跳空 ${sg(V.gap)}（${sg(V.gapPct, 1)}%）</b>。两次报价之间没有正常交易时段的成交，但所有人对新信息的看法已经体现在开盘价里了。你不需要先知道发生了什么，价格已经告诉你：市场的看法明显变${V.gap > 0 ? "乐观" : "悲观"}了。`
+      : `${last.date} 开盘 ${f2(last.o)}，和前一天收盘 ${f2(prev.c)} 只差 ${sg(V.gapPct, 1)}%，隔夜没有明显的新看法。看最近 20 个交易日里跳空最大的一次：<b>${g.date}</b> 从前收 ${f2(g.pc)} 直接开在 ${f2(g.o)}（${sg(g.pct, 1)}%）。那一刻所有人的新看法都被一次性计入了价格，这就是「市场涵盖一切」。`;
+
+    T.p2 = `过去一年（${V.yrStart.date} 至 ${last.date}）收盘价${V.yrChg >= 0 ? "上涨" : "下跌"}了 <b>${Math.abs(V.yrChg).toFixed(1)}%</b>，区间 ${f2(V.lo52)}–${f2(V.hi52)}。先看整体形状，找出持续朝一个方向走的几段，每一段背后就是一种占上风的「一致预期」。`;
+
+    const runTxt = V.runs.map(r => `<b>${r.from} 至 ${r.to}</b> 连续 ${r.n} 个月高点、低点同时${r.trend === "up" ? "抬高（系统性积累）" : "降低（系统性分发）"}`);
+    const lm = V.lastMonth;
+    T.p3 = (runTxt.length ? `表里能看到：${runTxt.join("；")}。` : "这一年里没有出现连续 3 个月以上高低点同升或同降的阶段，走势以震荡为主，积累和分发都不明显。") +
+      ` 最近一个月（${lm.k}，未满月）${lm.trend === "up" ? "高点、低点都在抬高" : lm.trend === "down" ? "高点、低点都在降低" : (lm.hUp ? "高点抬高、低点却降低" : "低点抬高、高点却降低") + "，信号混杂"}。` +
+      (lm.trend === "mixed" ? "信号混杂时怎么判断，第 5 章「趋势、支撑和阻力」会讲。" : "这个方向能不能延续，第 5 章「趋势、支撑和阻力」会讲怎么判断。");
+
+    const facts = [
+      Math.abs(V.gapPct) >= 1 ? `跳空${V.gap > 0 ? "高" : "低"}开 ${sg(V.gapPct, 1)}%` : "没有明显跳空",
+      V.up ? "阳烛" : "阴烛",
+      `收在当天区间的 ${V.closePos.toFixed(0)}% 位置`,
+      `成交量是 50 日均量的 ${V.vratio.toFixed(1)} 倍`,
+    ];
+    const verdict = V.up && V.closePos >= 70 ? "买方很强" : !V.up && V.closePos <= 30 ? "卖方很强" : "多空在拉锯，哪一方都没有占绝对优势";
+    T.p4 = `本页故意<b>不告诉你</b>这一天为什么涨跌。只看图，你就能读出：${facts.join("、")}。这些事实已经足够说明<b>${verdict}</b>${V.vratio >= 1.5 ? "，而且有放量配合" : V.vratio <= 0.7 ? "，不过成交量偏低，说服力要打折扣" : ""}。新闻解释可以事后再看，但它不应该取代你对图表的判断。`;
+
+    const near = Math.abs(V.oldHighDist) <= 5 ? "high" : Math.abs(V.oldLowDist) <= 5 ? "low" : null;
+    T.p5 = near === "high"
+      ? `大约一年前，${last.date === "" ? "" : ""}这只股票在 <b>${V.oldHigh.date}</b> 摸到过 <b>${f2(V.oldHigh.h)}</b>。现在价格又回到了这一带（${last.date} 收盘 ${f2(last.c)}，相差 ${sg(V.oldHighDist, 1)}%）。当年在这个价位卖出的人、套在高位的人，他们的心理会不会再次影响价格？这就是「历史重演」的思路。`
+      : near === "low"
+      ? `大约一年前，这只股票在 <b>${V.oldLow.date}</b> 跌到过 <b>${f2(V.oldLow.l)}</b>。现在价格回到了这一带（${last.date} 收盘 ${f2(last.c)}，相差 ${sg(V.oldLowDist, 1)}%）。当年在这里买入的人会不会再次出手？这就是「历史重演」的思路。`
+      : `大约一年前，这只股票的高点是 <b>${f2(V.oldHigh.h)}</b>（${V.oldHigh.date}），低点是 <b>${f2(V.oldLow.l)}</b>（${V.oldLow.date}）。现在收盘 ${f2(last.c)}，离高点 ${sg(V.oldHighDist, 1)}%、离低点 ${sg(V.oldLowDist, 1)}%。以后价格回到这些老位置附近时，当年参与者的心理可能再次起作用，这就是「历史重演」的思路。`;
+    T.p5 += "注意，这只是<b>值得留意的位置</b>，不是预测（第 5 章细讲）。";
+
+    T.vol = V.topAbs > V.avgAbs * 1.5
+      ? `近半年成交量最大的这几天，平均涨跌幅是 <b>${V.topAbs.toFixed(1)}%</b>，明显大于这半年平均每天 <b>${V.avgAbs.toFixed(1)}%</b> 的波动。这正是书中的观点：<b>放量时的价格变动更「算数」</b>。`
+      : `近半年成交量最大的这几天，平均涨跌幅是 <b>${V.topAbs.toFixed(1)}%</b>，平时每天平均 <b>${V.avgAbs.toFixed(1)}%</b>，差别不算大。放量不一定都伴随大涨大跌，比如指数调整、期权到期日也会放量，所以要结合价格一起看。`;
+
+    const t = V.t20;
+    T.tally = `这 20 天收盘价总共变化了 <b>${sg(t.total)}</b>，其中所有蜡烛<b>实体</b>（开盘到收盘）加起来是 <b>${sg(t.body)}</b>，<b>隔夜跳空</b>（前一天收盘到次日开盘）加起来是 <b>${sg(t.gaps)}</b>。` +
+      (Math.abs(t.gaps) > Math.abs(t.body)
+        ? "也就是说，这段时间的涨跌<b>大部分发生在隔夜</b>，而蜡烛颜色只记录盘中的胜负。"
+        : "这段时间的涨跌主要发生在<b>盘中</b>，阴阳烛的数量比较能代表真实的多空力量。") +
+      `<br>结论：<b>数阴阳烛是一个很快的初步判断，但不能只靠它</b>，还要看跳空、位置和成交量。这也是书中强调蜡烛图要和西方技术结合（第 5–8 章）的原因。`;
+
+    T.steps = [
+      `<b>这根蜡烛是什么颜色？</b>${kind}：收盘 ${f2(last.c)} ${V.up ? "&gt;" : "&lt;"} 开盘 ${f2(last.o)}，盘中${V.up ? "买方" : "卖方"}胜。`,
+      `<b>它和前一根之间有空隙吗？</b>` + (Math.abs(V.gapPct) >= 1
+        ? `有，开盘比前一天收盘${V.gap > 0 ? "高" : "低"} ${f2(Math.abs(V.gap))}，这段跳空不在实体里。当天总涨跌 ${sg(V.dayChg, 1)}% 中，实体贡献了 ${sg(V.bodyPct, 1)}%。`
+        : `几乎没有（${sg(V.gapPct, 1)}%），当天的涨跌 ${sg(V.dayChg, 1)}% 基本都在实体里。`),
+      `<b>收在哪里？</b>在当天波动范围的 ${V.closePos.toFixed(0)}% 位置，${V.closePos >= 70 ? "接近最高价" : V.closePos <= 30 ? "接近最低价" : "在中间"}。`,
+      `<b>成交量呢？</b>是 50 日均量的 ${V.vratio.toFixed(1)} 倍，${V.vratio >= 1.5 ? "明显放量，这次变动「算数」" : V.vratio <= 0.7 ? "明显缩量，说服力打折扣" : "属于正常水平"}（1.4 节）。`,
+      `<b>放在大背景里看：</b>过去一年${V.yrChg >= 0 ? "上涨" : "下跌"} ${Math.abs(V.yrChg).toFixed(1)}%；最近一个月${lm.trend === "up" ? "高低点都在抬高" : lm.trend === "down" ? "高低点都在降低" : "高低点信号混杂"}；离一年前的高点 ${sg(V.oldHighDist, 1)}%（原则 3、5）。`,
+    ];
+    T.conclusion = `第 1 章能得出的结论到此为止：这一天<b>${verdict}</b>${V.vratio >= 1.5 ? "，而且有成交量配合" : ""}。至于接下来会怎么走，要用到第 3–5 章的形态、支撑和阻力知识，学到时我们再回来看这张图。`;
+    return T;
+  }
+
+  // 给笔记用的「实战结论」（与页面同一套计算）
+  function notesCh1(sym, zh, V) {
+    const { last } = V, T = V.text, strip = s => s.replace(/<[^>]+>/g, "").replace(/&gt;/g, ">").replace(/&lt;/g, "<");
+    return [
+      `${zh}（${sym}）${last.date}：${T.kind}，开 ${f2(last.o)} 高 ${f2(last.h)} 低 ${f2(last.l)} 收 ${f2(last.c)}，收在当日区间 ${V.closePos.toFixed(0)}% 位置。`,
+      ...T.steps.slice(1).map(strip),
+      strip(T.p3),
+      strip(T.tally).split("结论：")[0],
+      strip(T.conclusion),
+    ];
+  }
+
+  const api = { toRows, computeCh1, notesCh1, MIN_INDEX, niceBox, pointAndFigure };
+  if (typeof module !== "undefined") module.exports = api; else root.CH1 = api;
+})(this);
+
+// 「问这一页」聊天框：右下角入口，把当前页文字 + MSFT 数据 + 问题交给模型回答。
+// 两种后端：
+//   - 本机（通过 http://127.0.0.1 打开）：走本机服务 → 本机 claude，用页面作者自己的凭据。
+//   - 其他（公网 GitHub Pages、别人下载的 file://）：访客自带 API 密钥（BYOK），密钥只存在访客自己浏览器的
+//     localStorage 里，请求从浏览器直接发给访客选的服务商，绝不经过、也不会用到页面作者的凭据。
+
+(function () {
+  const SERVER = location.origin;                       // 本机服务就是页面自己的来源
+  const LOCAL = location.hostname === "127.0.0.1";
+  const KEY = "cs-chat:" + location.pathname;
+  const CFG_KEY = "cs-chat-byok";
+  let history = JSON.parse(localStorage.getItem(KEY) || "[]");
+  let candle = null;
+
+  // 与 chat_server.py 的 SYSTEM 保持一致
+  const SYSTEM = `你是一位耐心的蜡烛图（K 线）学习助教。学习者零基础，正在读《日本蜡烛图分析技术从入门到精通》
+（Wayne A. Corbitt 著），目标是在实战中看懂走势、知道对应哪个知识点。所有例子用微软（MSFT）日线。
+
+回答规则：
+- 用简体中文，先给结论再解释；尽量短，必要时用列表。零基础能听懂，术语第一次出现时顺手解释。
+- 以「当前学习页」的内容和随附的 MSFT 数据为依据；引用数字时只用给出的数据，不要编造价格、日期或新闻。
+- 尽量指出问题对应页面里的哪一节（如「1.3 原则 3」）；超出本章的内容可以简单说明，并告诉对方在第几章会细讲。
+- 讲书中观点时用自己的话转述，不要大段复述原书文字。
+- 只做学习讲解：不给买卖建议、不预测具体价格。被问到「该不该买」时，说明这超出学习范围，并转为讲解如何读图。
+- 如果页面和数据里没有足够信息，直说不知道。`;
+
+  const PROVIDERS = {
+    anthropic: { name: "Anthropic（Claude）", models: ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"],
+                 keyHint: "sk-ant-…", keyUrl: "https://console.anthropic.com/settings/keys" },
+    openai: { name: "OpenAI 兼容接口（OpenAI、OpenRouter 等）", models: [], keyHint: "sk-…",
+              baseUrl: "https://api.openai.com/v1" },
+  };
+  let cfg = Object.assign({ provider: "anthropic", model: "claude-opus-5-5", key: "", baseUrl: PROVIDERS.openai.baseUrl },
+                          JSON.parse(localStorage.getItem(CFG_KEY) || "{}"));
+
+  window.csSelectCandle = r => {
+    candle = r;
+    const chip = document.getElementById("chat-candle");
+    if (chip) { chip.hidden = false; chip.querySelector("span").textContent = `已选 K 线：${r.date}`; }
+    open(true);
+  };
+
+  function md(s) {
+    const esc = s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    return esc.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/`([^`]+)`/g, "<code>$1</code>")
+      .replace(/^#{1,4} (.+)$/gm, "<b>$1</b>").replace(/^[-•] (.+)$/gm, "• $1").replace(/\n/g, "<br>");
+  }
+
+  function bubble(role, text) {
+    const d = document.createElement("div");
+    d.className = "msg " + role;
+    d.innerHTML = md(text);
+    const log = document.getElementById("chat-log");
+    log.appendChild(d); log.scrollTop = log.scrollHeight;
+    return d;
+  }
+
+  function open(show) {
+    document.getElementById("chat-panel").hidden = !show;
+    if (show && !LOCAL && !cfg.key) showSettings(true);
+    else if (show) document.getElementById("chat-q").focus();
+  }
+
+  function context(q, sel) {
+    const rows = (window.D && (D.year || D.sixty) || []).map(r => [r.date, r.o, r.h, r.l, r.c, r.v].join(","));
+    return {
+      title: document.title, page: document.querySelector("main").innerText, rows, question: q, history,
+      selection: sel || null,
+      candle: candle ? `${candle.date} 开 ${candle.o} 高 ${candle.h} 低 ${candle.l} 收 ${candle.c} 量 ${candle.v}` : null,
+    };
+  }
+
+  // 与 chat_server.py 的 build_prompt 保持一致
+  function buildPrompt(req) {
+    const parts = [`# 当前学习页：${req.title}\n${req.page.slice(0, 30000)}`];
+    if (req.rows.length) parts.push("# MSFT 日线（date,open,high,low,close,volume）\n" + req.rows.slice(-130).join("\n"));
+    if (req.candle) parts.push(`# 学习者在图上点选的 K 线\n${req.candle}`);
+    if (req.selection) parts.push(`# 学习者选中的页面文字\n${req.selection.slice(0, 2000)}`);
+    const hist = req.history.slice(-10);
+    if (hist.length) parts.push("# 之前的对话\n" + hist.map(h => `${h.role === "user" ? "学习者" : "助教"}：${h.text}`).join("\n"));
+    parts.push(`# 学习者现在的问题\n${req.question}`);
+    return parts.join("\n\n");
+  }
+
+  // 逐块读取流式响应；onEvent 收到每个 SSE data 行（本机服务是纯文本，直接整块给）
+  async function readStream(res, onChunk) {
+    const reader = res.body.getReader(), dec = new TextDecoder();
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) return;
+      onChunk(dec.decode(value, { stream: true }));
+    }
+  }
+
+  function sseLines(onData) {
+    let buf = "";
+    return chunk => {
+      buf += chunk;
+      const lines = buf.split("\n");
+      buf = lines.pop();
+      for (const l of lines) if (l.startsWith("data:")) onData(l.slice(5).trim());
+    };
+  }
+
+  async function askLocal(req, emit) {
+    const res = await fetch(SERVER + "/api/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(req) });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    await readStream(res, emit);
+  }
+
+  async function askAnthropic(req, emit) {
+    const body = {
+      model: cfg.model, max_tokens: 8000, stream: true, system: SYSTEM,
+      output_config: { effort: "low" },               // 聊天类问题用低 effort，回答更快
+      messages: [{ role: "user", content: buildPrompt(req) }],
+    };
+    const headers = {
+      "content-type": "application/json", "x-api-key": cfg.key, "anthropic-version": "2023-06-01",
+      "anthropic-dangerous-direct-browser-access": "true",   // 允许浏览器直连（访客自己的密钥）
+    };
+    if (cfg.model !== "claude-haiku-5-5") {           // 被安全分类器拒答时自动换模型重试
+      headers["anthropic-beta"] = "server-side-fallback-2026-07-01";
+      body.fallbacks = "default";
+    }
+    const res = await fetch("https://api.anthropic.com/v1/messages", { method: "POST", headers, body: JSON.stringify(body) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}：${(await res.text()).slice(0, 300)}`);
+    await readStream(res, sseLines(d => {
+      const ev = JSON.parse(d);
+      if (ev.type === "content_block_delta" && ev.delta.type === "text_delta") emit(ev.delta.text);
+      else if (ev.type === "error") emit(`\n\n⚠️ ${ev.error.message}`);
+      else if (ev.type === "message_delta" && ev.delta.stop_reason === "refusal") emit("\n\n⚠️ 模型拒绝回答这个问题。");
+    }));
+  }
+
+  async function askOpenAI(req, emit) {
+    const res = await fetch(cfg.baseUrl.replace(/\/$/, "") + "/chat/completions", {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: "Bearer " + cfg.key },
+      body: JSON.stringify({ model: cfg.model, stream: true,
+        messages: [{ role: "system", content: SYSTEM }, { role: "user", content: buildPrompt(req) }] }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}：${(await res.text()).slice(0, 300)}`);
+    await readStream(res, sseLines(d => {
+      if (d === "[DONE]") return;
+      const t = JSON.parse(d).choices?.[0]?.delta?.content;
+      if (t) emit(t);
+    }));
+  }
+
+  async function ask(q) {
+    const sel = String(window.getSelection() || "").trim();
+    bubble("user", q + (candle ? `\n（附：${candle.date} 这根 K 线）` : "") + (sel ? "\n（附：选中的文字）" : ""));
+    const out = bubble("bot", "思考中…");
+    const req = context(q, sel);
+    let text = "";
+    const emit = t => {
+      text += t; out.innerHTML = md(text);
+      const log = document.getElementById("chat-log"); log.scrollTop = log.scrollHeight;
+    };
+    try {
+      if (LOCAL) await askLocal(req, emit);
+      else if (cfg.provider === "anthropic") await askAnthropic(req, emit);
+      else await askOpenAI(req, emit);
+      if (!text) emit("（没有收到回答）");
+    } catch (e) {
+      text = LOCAL
+        ? "⚠️ 连不上本机问答服务（" + e.message + "）。请确认本机的学习页服务正在运行。"
+        : "⚠️ 请求失败：" + e.message + "\n请检查 ⚙️ 设置里的密钥和模型。若是「OpenAI 兼容接口」，该服务商需要允许浏览器直接调用（CORS）。";
+      out.innerHTML = md(text);
+    }
+    history.push({ role: "user", text: q }, { role: "bot", text });
+    history = history.slice(-20);
+    localStorage.setItem(KEY, JSON.stringify(history));
+    candle = null;
+    document.getElementById("chat-candle").hidden = true;
+  }
+
+  function showSettings(show) {
+    const s = document.getElementById("chat-settings");
+    s.hidden = !show;
+    if (!show) return;
+    s.querySelector("[name=provider]").value = cfg.provider;
+    s.querySelector("[name=key]").value = cfg.key;
+    s.querySelector("[name=baseUrl]").value = cfg.baseUrl;
+    renderModels();
+  }
+
+  function renderModels() {
+    const s = document.getElementById("chat-settings");
+    const p = s.querySelector("[name=provider]").value;
+    const list = PROVIDERS[p].models;
+    s.querySelector(".base-row").hidden = p !== "openai";
+    s.querySelector("[name=key]").placeholder = PROVIDERS[p].keyHint;
+    const m = s.querySelector("[name=model]");
+    m.setAttribute("list", list.length ? "chat-models" : "");
+    document.getElementById("chat-models").innerHTML = list.map(x => `<option value="${x}">`).join("");
+    if (p !== cfg.provider) m.value = list[0] || "";
+    else m.value = cfg.model;
+    m.placeholder = list.length ? "" : "例如 gpt-4o-mini、openrouter 上的模型名";
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    const wrap = document.createElement("div");
+    wrap.innerHTML = `
+      <button id="chat-btn">💬 问这一页</button>
+      <div id="chat-panel" hidden>
+        <div class="chat-head"><b>问这一页</b><span class="muted">基于本页内容和 MSFT 数据回答</span>
+          ${LOCAL ? "" : '<button id="chat-gear" title="模型与密钥">⚙️</button>'}
+          <button id="chat-clear" title="清空对话">清空</button><button id="chat-x">✕</button></div>
+        <form id="chat-settings" hidden>
+          <p class="muted">使用<b>你自己的</b> API 密钥。密钥只保存在你这台设备的浏览器里，提问时由浏览器直接发给你选的服务商，不经过本站；费用记在你自己的账户上。</p>
+          <label>服务商 <select name="provider">${Object.entries(PROVIDERS).map(([k, v]) => `<option value="${k}">${v.name}</option>`).join("")}</select></label>
+          <label class="base-row">接口地址 <input name="baseUrl"></label>
+          <label>模型 <input name="model"><datalist id="chat-models"></datalist></label>
+          <label>API 密钥 <input name="key" type="password" autocomplete="off"></label>
+          <div class="row"><button type="submit">保存</button><button type="button" id="chat-forget">删除已保存的密钥</button></div>
+        </form>
+        <div id="chat-log"></div>
+        <div id="chat-candle" class="chip" hidden><span></span><button title="取消">✕</button></div>
+        <form id="chat-form"><textarea id="chat-q" rows="2" placeholder="例如：为什么这一天比前一天涨了还是阴烛？（回车发送，Shift+回车换行）"></textarea><button>发送</button></form>
+        <div class="chat-foot muted">小技巧：点图上任意一根 K 线可以附上它；先选中一段文字再提问也会附上。回答仅供学习，不构成投资建议。</div>
+      </div>`;
+    document.body.appendChild(wrap);
+
+    document.getElementById("chat-btn").onclick = () => open(document.getElementById("chat-panel").hidden);
+    document.getElementById("chat-x").onclick = () => open(false);
+    document.getElementById("chat-clear").onclick = () => {
+      history = []; localStorage.removeItem(KEY); document.getElementById("chat-log").innerHTML = "";
+    };
+    document.querySelector("#chat-candle button").onclick = () => { candle = null; document.getElementById("chat-candle").hidden = true; };
+    if (!LOCAL) {
+      const s = document.getElementById("chat-settings");
+      document.getElementById("chat-gear").onclick = () => showSettings(s.hidden);
+      s.querySelector("[name=provider]").onchange = renderModels;
+      s.onsubmit = e => {
+        e.preventDefault();
+        cfg = { provider: s.provider.value, model: s.model.value.trim(), key: s.key.value.trim(), baseUrl: s.baseUrl.value.trim() };
+        localStorage.setItem(CFG_KEY, JSON.stringify(cfg));
+        showSettings(false);
+        document.getElementById("chat-q").focus();
+      };
+      document.getElementById("chat-forget").onclick = () => {
+        cfg.key = ""; localStorage.setItem(CFG_KEY, JSON.stringify(cfg)); s.key.value = "";
+      };
+    }
+    history.forEach(h => bubble(h.role, h.text));
+    const qEl = document.getElementById("chat-q");
+    qEl.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); document.getElementById("chat-form").requestSubmit(); } });
+    document.getElementById("chat-form").onsubmit = e => {
+      e.preventDefault();
+      const q = qEl.value.trim();
+      if (!q) return;
+      if (!LOCAL && !cfg.key) { showSettings(true); return; }
+      qEl.value = "";
+      ask(q);
+    };
+  });
+})();
+
+// 各章共用：股票/日期选择器、行情加载、URL 参数、数据说明条。
+// 章节调用 initPage({ minIndex, render(d, i) })；d = {s, name, zh, as_of, rows}，i = 所选交易日在 rows 里的下标。
+// 数据来自公开站点 market/*.json（GitHub Actions 每个交易日收盘后更新）；URL 参数 ?t=MSFT&d=2026-11-04 可分享。
+
+(function (root) {
+  const PUBLIC = "https://yuhan-kong.github.io/candlestick-study/market/";
+  // 页面可以先设 window.MARKET_BASE，改用别的行情目录
+  const BASE = root.MARKET_BASE || (location.hostname.endsWith("github.io") ? "../market/" : PUBLIC);
+  const cache = {};
+  const $ = id => document.getElementById(id);
+  const toRows = raw => raw.map(r => ({ date: r[0], o: r[1], h: r[2], l: r[3], c: r[4], v: r[5] }));
+
+  // 页面开着超过 5 分钟就重新取（收盘后数据会更新）；cache: "no-cache" = 每次都向服务器确认，没变时只回 304，不重新下载
+  const FRESH = 5 * 60e3;
+  async function load(sym) {
+    if (!cache[sym] || Date.now() - cache[sym].at > FRESH) {
+      const res = await fetch(BASE + encodeURIComponent(sym) + ".json", { cache: "no-cache" });
+      if (!res.ok) throw new Error(`${sym} 数据加载失败（HTTP ${res.status}）`);
+      const d = await res.json();
+      cache[sym] = { ...d, rows: toRows(d.rows), at: Date.now() };
+    }
+    return cache[sym];
+  }
+
+  // 把 {key: 值} 填进 [data-v]（纯文本）和 [data-h]（HTML）
+  function fill(textMap, htmlMap) {
+    document.querySelectorAll("[data-v]").forEach(el => { const k = el.dataset.v; if (k in textMap) el.textContent = textMap[k]; });
+    document.querySelectorAll("[data-h]").forEach(el => { const k = el.dataset.h; if (htmlMap && k in htmlMap) el.innerHTML = htmlMap[k]; });
+  }
+
+  function initPage({ minIndex, render }) {
+    let cur = null, index = [];
+
+    async function show(sym, date) {
+      $("data-note").textContent = "正在加载数据…";
+      try {
+        const d = await load(sym), rows = d.rows;
+        const pd = $("pick-date"), mi = Math.min(minIndex, rows.length - 1);   // 上市不到一年的股票：页面自己处理
+        pd.min = rows[mi].date; pd.max = rows[rows.length - 1].date;
+        let i = rows.length - 1;
+        if (date) while (i > mi && rows[i].date > date) i--;   // 非交易日 → 之前最近的交易日
+        pd.value = rows[i].date;
+        $("pick-sym").value = sym;
+        cur = { sym, date: rows[i].date };
+        history.replaceState(null, "", location.pathname + "?" + new URLSearchParams({ t: sym, d: rows[i].date }));
+        const label = `${d.zh}（${d.s}）`;
+        render(d, i, label);
+        const latest = rows[rows.length - 1].date;
+        $("data-note").innerHTML = `数据：<b>${label} ${rows[i].date}（美东）收盘</b>` +
+          (rows[i].date === latest ? "，这是目前最新的交易日。" : `；最新交易日是 ${latest}，你正在「回到过去」看图。`) +
+          " 来源 Yahoo Finance，每个交易日收盘后自动更新；未收盘时只用到前一交易日。";
+      } catch (e) {
+        console.error(e);
+        $("data-note").textContent = "⚠️ " + e.message + "。如果你是直接双击打开的本地文件，需要联网才能加载行情数据。";
+      }
+    }
+    root.csShow = (sym, date) => show(sym || cur.sym, date);   // 页面内「跳到这一天」链接用
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        index = await (await fetch(BASE + "index.json", { cache: "no-cache" })).json();
+      } catch (e) {
+        $("data-note").textContent = "⚠️ 股票清单加载失败，请检查网络后刷新。"; return;
+      }
+      if (root.PICK_FILTER) index = index.filter(root.PICK_FILTER);
+      $("pick-sym").innerHTML = index.map(x => `<option value="${x.s}">${x.zh}（${x.s}）</option>`).join("");
+      const p = new URLSearchParams(location.search);
+      const sym = index.some(x => x.s === p.get("t")) ? p.get("t") : index.some(x => x.s === "MSFT") ? "MSFT" : index[0].s;
+      $("pick-sym").onchange = e => show(e.target.value, cur && cur.date);
+      $("pick-date").onchange = e => e.target.value && show(cur.sym, e.target.value);
+      $("pick-latest").onclick = () => show(cur.sym, null);
+      show(sym, p.get("d"));
+    });
+  }
+
+  root.PAGE = { initPage, fill, toRows, load };
+})(this);
+
+// 第 1 章页面：选股票、选日期（page_common.js）→ 用 CH1.computeCh1 重算 → 填充文字、表格、图表、练习题。
+
+(function () {
+  const $ = id => document.getElementById(id);
+  const f2 = n => n.toFixed(2), sg = (n, d = 2) => (n >= 0 ? "+" : "") + n.toFixed(d);
+  const fmtVol = v => (v / 1e6).toFixed(1) + "M";
+
+  function quizHTML(V, label) {
+    const ex = V.blackUp || V.whiteDown, isBlack = !!V.blackUp;
+    const qs = [];
+    if (ex) qs.push({
+      q: `${label} ${ex.date}：开盘 ${f2(ex.o)}，收盘 ${f2(ex.c)}，前一天收盘 ${f2(ex.pc)}。这一天的蜡烛是？`,
+      opts: isBlack ? [["阳烛，因为比前一天涨了", 0], ["阴烛，因为收盘价低于开盘价", 1], ["看不出来，需要成交量", 0]]
+                    : [["阴烛，因为比前一天跌了", 0], ["阳烛，因为收盘价高于开盘价", 1], ["看不出来，需要成交量", 0]],
+      exp: `颜色只比较<b>当天</b>的开盘价和收盘价。${f2(ex.c)} ${isBlack ? "&lt;" : "&gt;"} ${f2(ex.o)}，所以是${isBlack ? "阴" : "阳"}烛，尽管它比前一天收盘价${isBlack ? "高" : "低"}。` });
+    qs.push({ q: "哪种图表<b>既没有时间信息，也不体现成交量</b>？",
+      opts: [["线形图", 0], ["点数图", 1], ["条形图", 0], ["蜡烛图", 0]],
+      exp: "点数图的两大缺点：①只显示价格变动，不显示变动发生的时间；②没有成交量。" });
+    qs.push({ q: "条形图上，每根竖线<b>左边</b>的小横杠代表什么？",
+      opts: [["开盘价", 1], ["收盘价", 0], ["最高价", 0], ["前一天收盘价", 0]],
+      exp: "左边是开盘价，右边是收盘价，竖线的顶和底是最高价和最低价。" });
+    const L = V.last, P = V.prev;
+    const right = Math.abs(V.gap), w1 = Math.abs(L.c - P.c), w2 = L.h - L.l;
+    const opts4 = [[f2(w1), 0], [f2(right), 1], [f2(w2), 0]];
+    if (new Set(opts4.map(o => o[0])).size === 3) qs.push({
+      q: `${label} ${L.date} 的开盘价和前一天收盘价相差多少美元？（提示：原则 1、跳空）`, opts: opts4,
+      exp: `|开盘 ${f2(L.o)} − 前收 ${f2(P.c)}| = ${f2(right)}。另外两个选项分别是「收盘较前收的变化」和「当天最高价减最低价」，三个概念要分清。` });
+    qs.push({ q: "某只股票连续几个月<b>高点和低点都在抬高</b>。这更可能说明？",
+      opts: [["系统性积累（买方在持续吸纳）", 1], ["系统性分发（卖方在持续派发）", 0], ["价格完全随机，看不出来", 0]],
+      exp: "原则 3：预期乐观时高点、低点都抬高，积累显而易见；反之则是分发。" });
+    qs.push({ q: "一只股票突然大涨，按照原则 4，你<b>首先</b>应该做什么？",
+      opts: [["先上网搜新闻，弄清楚为什么涨", 0], ["先看图：价格怎么走的、成交量如何", 1], ["问问别人的看法", 0]],
+      exp: "关注价格「怎么走」胜过「为什么走」：先专注于图表本身，新闻和他人观点放在后面。" });
+    qs.push({ q: "同样涨 3%，一次放量、一次缩量，哪一次更值得重视？",
+      opts: [["放量的那次", 1], ["缩量的那次", 0], ["一样重要", 0]],
+      exp: "成交量用来衡量价格变动的有效度：成交量越高，这次变动的分量越重。" });
+    const t = V.t20;
+    qs.push({ q: `最近 20 天 ${label} 收盘价总共变化 ${sg(t.total)}。蜡烛的颜色（阴/阳）记录的是哪一段价格变化？`,
+      opts: [["前一天收盘到当天收盘", 0], ["当天开盘到当天收盘", 1], ["当天最低价到最高价", 0]],
+      exp: `这 20 天里，实体（开盘到收盘）合计 ${sg(t.body)}，隔夜跳空合计 ${sg(t.gaps)}。颜色只反映实体那一段，所以数阴阳烛只是初步判断。` });
+    qs.push({ q: "蜡烛图定式通常预示多长时间的走势？",
+      opts: [["短期，一般不超过一周", 1], ["一到三个月", 0], ["一年以上", 0]],
+      exp: "蜡烛定式多是短期（不超过一周）的形态，但短期的反转或持续可能引出更大的行情；做长线要结合更大范围的分析。" });
+    return qs.map((x, n) => `<div class="q"><b>${n + 1}.</b> ${x.q}<div class="opts">` +
+      x.opts.map(o => `<button class="opt" data-ok="${o[1]}">${o[0]}</button>`).join("") +
+      `</div><div class="exp">${x.exp}</div></div>`).join("");
+  }
+
+  function render(d, i, label) {
+    const V = CH1.computeCh1(d.rows, i), L = V.last, T = V.text;
+    window.D = { year: V.year, sixty: V.sixty };       // 给「问这一页」用
+    PAGE.fill({
+      label, date: L.date, o: f2(L.o), h: f2(L.h), l: f2(L.l), c: f2(L.c), hiNote: T.hiNote,
+      vol: fmtVol(L.v), v50: fmtVol(V.v50), vratio: V.vratio.toFixed(1) + " 倍", dayChg: sg(V.dayChg, 1) + "%",
+      sixStart: V.six[0].date, box: String(V.box), pnfCols: String(V.pnf.length),
+      t20start: V.t20.start, t20w: V.t20.w, t20b: V.t20.b, t20wv: V.t20.wv.toFixed(0) + "M", t20bv: V.t20.bv.toFixed(0) + "M",
+      t60start: V.t60.start, t60w: V.t60.w, t60b: V.t60.b, t60wv: V.t60.wv.toFixed(0) + "M", t60bv: V.t60.bv.toFixed(0) + "M",
+    });
+    const ex = [];
+    if (V.blackUp) ex.push(`<li><b>${V.blackUp.date}</b>：开盘 ${f2(V.blackUp.o)}，收盘 ${f2(V.blackUp.c)}，比前一天收盘 ${f2(V.blackUp.pc)} 还<b>高</b>，但收盘低于开盘，所以是<b>阴烛</b>。</li>`);
+    if (V.whiteDown) ex.push(`<li><b>${V.whiteDown.date}</b>：开盘 ${f2(V.whiteDown.o)}，收盘 ${f2(V.whiteDown.c)}，比前一天收盘 ${f2(V.whiteDown.pc)} <b>低</b>，但收盘高于开盘，所以是<b>阳烛</b>。</li>`);
+    PAGE.fill({}, { anatomy: T.anatomy, examples: ex.join(""), p1: T.p1, p2: T.p2, p3: T.p3, p4: T.p4, p5: T.p5,
+      vol: T.vol, tally: T.tally, steps: T.steps.map(s => `<li>${s}</li>`).join(""), conclusion: T.conclusion });
+
+    $("month-rows").innerHTML = V.months.map((m, j) => {
+      const a = up => j ? (up ? "↑ 抬高" : "↓ 降低") : "—";
+      return `<tr><td>${m.k}${m.partial ? "（至所选日）" : ""}</td><td class="num">${f2(m.h)}</td><td>${a(m.hUp)}</td><td class="num">${f2(m.l)}</td><td>${a(m.lUp)}</td></tr>`;
+    }).join("");
+    $("vol-rows").innerHTML = V.topVol.map(x =>
+      `<tr><td>${x.date}</td><td class="num">${fmtVol(x.v)}</td><td class="num">${x.ratio.toFixed(1)} 倍</td><td class="num">${sg(x.chg, 1)}%</td></tr>`).join("");
+
+    anatomy("anatomy", L);
+    priceChart("year-line", { type: "line", rows: V.year, volume: false, height: 300 });
+    priceChart("c-line", { type: "line", rows: V.six, volume: true });
+    priceChart("c-bar", { type: "bar", rows: V.six, volume: true });
+    priceChart("c-candle", { type: "candle", rows: V.six, volume: true });
+    pnfChart("c-pnf", V.pnf, V.box);
+    const ex1 = V.blackUp || V.whiteDown;
+    priceChart("c-sixty", { type: "candle", rows: V.sixty, volume: true, height: 420,
+      marks: Object.assign(ex1 ? { [ex1.date]: "1" } : {}, { [L.date]: "今" }),
+      lines: [{ y: V.oldHigh.h, label: `一年前高点 ${f2(V.oldHigh.h)}（${V.oldHigh.date}）` }] });
+
+    $("quiz").innerHTML = quizHTML(V, label);
+    quiz();
+
+  }
+
+  PAGE.initPage({ minIndex: CH1.MIN_INDEX, render });
+})();
+
+</script>
+</body>
+</html>
