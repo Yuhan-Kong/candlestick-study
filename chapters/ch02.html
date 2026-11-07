@@ -1116,7 +1116,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 (function (root) {
   const PUBLIC = "https://yuhan-kong.github.io/candlestick-study/market/";
-  // 私人看板（private/）用本机下载的行情：页面里先设 window.MARKET_BASE
+  // 页面可以先设 window.MARKET_BASE，改用别的行情目录
   const BASE = root.MARKET_BASE || (location.hostname.endsWith("github.io") ? "../market/" : PUBLIC);
   const cache = {};
   const $ = id => document.getElementById(id);

@@ -785,7 +785,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 // 第 1 章的计算与文字生成：输入任意股票的日线和选定日期，输出页面上所有数字和按规则生成的点评。
-// 纯函数、不碰 DOM：浏览器里直接用；Node 里 require 后用来生成 Notion 笔记（notes_ch01.js）。
+// 纯函数、不碰 DOM：浏览器里直接用；Node 里 require 后用来生成笔记（notes_ch01.js）。
 
 (function (root) {
   const f2 = n => n.toFixed(2);
@@ -978,7 +978,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return T;
   }
 
-  // 给 Notion 的「实战结论」（与页面同一套计算）
+  // 给笔记用的「实战结论」（与页面同一套计算）
   function notesCh1(sym, zh, V) {
     const { last } = V, T = V.text, strip = s => s.replace(/<[^>]+>/g, "").replace(/&gt;/g, ">").replace(/&lt;/g, "<");
     return [
@@ -1259,7 +1259,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 (function (root) {
   const PUBLIC = "https://yuhan-kong.github.io/candlestick-study/market/";
-  // 私人看板（private/）用本机下载的行情：页面里先设 window.MARKET_BASE
+  // 页面可以先设 window.MARKET_BASE，改用别的行情目录
   const BASE = root.MARKET_BASE || (location.hostname.endsWith("github.io") ? "../market/" : PUBLIC);
   const cache = {};
   const $ = id => document.getElementById(id);
